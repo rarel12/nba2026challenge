@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBA Playoff Challenge 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;min-height:100vh}
+#intro{background:#000;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',monospace;position:relative;overflow:hidden}
+#app{display:none;font-family:'Arial',sans-serif;background:#0a0a0a;min-height:100vh}
+.scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:5}
+.pixel-border{display:flex;gap:5px;padding:4px 0}
+.pb{width:12px;height:12px;border-radius:1px}
+.title-nba{font-size:64px;font-weight:900;color:#E63A1E;font-family:'Courier New',monospace;letter-spacing:6px;text-shadow:4px 4px 0 #8B1A0A,7px 7px 0 #000;line-height:1;text-align:center}
+.title-playoff{font-size:32px;font-weight:900;color:#fff;font-family:'Courier New',monospace;letter-spacing:9px;text-shadow:3px 3px 0 #555,5px 5px 0 #000;margin-top:4px;text-align:center}
+.title-challenge{font-size:15px;color:#1E90FF;font-family:'Courier New',monospace;letter-spacing:11px;text-transform:uppercase;margin-top:8px;text-shadow:2px 2px 0 #003080;text-align:center}
+.title-year{font-size:12px;color:#fff;font-family:'Courier New',monospace;letter-spacing:7px;margin-top:6px;text-align:center;opacity:0.6}
+#press-btn{margin-top:20px;font-size:14px;color:#FFC72C;font-family:'Courier New',monospace;letter-spacing:4px;text-transform:uppercase;cursor:pointer;background:#000;border:2px solid #FFC72C;padding:14px 36px}
+#press-btn:hover{background:#FFC72C;color:#000}
+#press-btn:active{transform:scale(0.97)}
+.bottom-strip{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:20px}
+.coin-text{font-size:11px;color:#E63A1E;font-family:'Courier New',monospace;letter-spacing:3px;text-transform:uppercase}
+.mode-text{font-size:9px;color:#555;font-family:'Courier New',monospace;letter-spacing:2px;text-transform:uppercase}
+#wipe{position:fixed;inset:0;background:#E63A1E;z-index:999;display:none;transform:translateX(-100%)}
+#transition{display:none;position:fixed;inset:0;background:#000;z-index:50;font-family:'Courier New',monospace;overflow:hidden}
+.trans-scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.12) 3px,rgba(0,0,0,0.12) 4px);pointer-events:none;z-index:10}
+.trans-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,#1a0a00 0%,#000 70%)}
+.trans-stage{position:relative;z-index:6;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;gap:0;padding:0}
+.trans-coach{opacity:0;transform:translateX(-80px);transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.16,1,0.3,1);position:relative;flex-shrink:0}
+.trans-coach.in{opacity:1;transform:translateX(0)}
+.trans-coach img{
+  height:88vh;
+  max-height:680px;
+  width:auto;
+  object-fit:contain;
+  object-position:center top;
+  filter:
+    contrast(1.8)
+    brightness(1.1)
+    saturate(0.2)
+    sepia(0.3);
+  -webkit-filter:
+    contrast(1.8)
+    brightness(1.1)
+    saturate(0.2)
+    sepia(0.3);
+}
+.trans-coach-glow{
+  position:absolute;
+  left:0;bottom:0;right:0;
+  height:180px;
+  background:linear-gradient(to top,#000 30%,transparent);
+  pointer-events:none;
+}
+.trans-coach-side{
+  position:absolute;
+  right:-20px;top:0;bottom:0;
+  width:60px;
+  background:linear-gradient(to right,transparent,#000);
+  pointer-events:none;
+}
+.trans-right{display:flex;flex-direction:column;justify-content:center;padding:0 40px 0 20px;max-width:380px;flex-shrink:0}
+.trans-bubble-wrap{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease}
+.trans-bubble-wrap.in{opacity:1;transform:translateY(0)}
+.trans-bubble{background:#fff;border:5px solid #000;padding:24px 28px;position:relative;box-shadow:8px 8px 0 #000,12px 12px 0 rgba(255,199,44,0.3)}
+.trans-bubble::before{content:'';position:absolute;left:-30px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:16px solid transparent;border-bottom:16px solid transparent;border-right:30px solid #000}
+.trans-bubble::after{content:'';position:absolute;left:-22px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-right:22px solid #fff}
+.trans-quote{font-size:17px;font-weight:900;color:#000;font-family:'Courier New',monospace;letter-spacing:0.5px;line-height:1.5;text-transform:uppercase}
+.trans-attr{font-size:10px;color:#888;margin-top:10px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace}
+.trans-title{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:10px;color:#FFC72C;letter-spacing:5px;text-transform:uppercase;font-family:'Courier New',monospace;white-space:nowrap;z-index:10}
+.trans-corner-tl{position:absolute;top:16px;left:16px;width:30px;height:30px;border-top:3px solid #FFC72C;border-left:3px solid #FFC72C;z-index:10}
+.trans-corner-tr{position:absolute;top:16px;right:16px;width:30px;height:30px;border-top:3px solid #FFC72C;border-right:3px solid #FFC72C;z-index:10}
+.trans-corner-bl{position:absolute;bottom:20px;left:16px;width:30px;height:30px;border-bottom:3px solid #FFC72C;border-left:3px solid #FFC72C;z-index:10}
+.trans-corner-br{position:absolute;bottom:20px;right:16px;width:30px;height:30px;border-bottom:3px solid #FFC72C;border-right:3px solid #FFC72C;z-index:10}
+.trans-bar{position:absolute;bottom:0;left:0;height:5px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
+.trans-bar.go{width:100%}
+@media(max-width:600px){
+  .trans-stage{flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:60px;gap:0}
+  .trans-coach img{height:58vh;max-height:420px}
+  .trans-right{padding:0 20px;width:100%}
+  .trans-bubble::before{left:50%;top:-26px;transform:translateX(-50%);border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:26px solid #000;border-top:none}
+  .trans-bubble::after{left:50%;top:-18px;transform:translateX(-50%);border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:20px solid #fff;border-top:none}
+  .trans-quote{font-size:14px}
+  .trans-coach-side{display:none}
+  .trans-coach-glow{height:100px}
+}
+.app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase}
+.round-pill{background:rgba(255,199,44,0.15);color:#FFC72C;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,199,44,0.3);letter-spacing:1px}
+.tab-bar{display:flex;background:#001A3D}
+.tab-btn{flex:1;padding:12px;font-size:11px;font-weight:700;color:rgba(255,199,44,0.4);background:none;border:none;cursor:pointer;letter-spacing:2px;text-transform:uppercase;border-bottom:3px solid transparent;font-family:'Arial',sans-serif}
+.tab-btn.active{color:#FFC72C;border-bottom-color:#FFC72C}
+.section{display:none;padding:16px;background:#0a0a0a}
+.section.active{display:block}
+.status-bar{background:#111;border:1px solid #222;border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.status-text{font-size:10px;color:#555;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace}
+.status-live{font-size:10px;color:#E63A1E;letter-spacing:2px;font-family:'Courier New',monospace;font-weight:700}
+/* STANDINGS */
+.lb-card{background:#111;border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.lb-header{background:#001A3D;padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+.lb-header-text{font-size:9px;color:#FFC72C;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace}
+.lb-row{display:flex;align-items:center;padding:16px;gap:12px;border-bottom:1px solid #1a1a1a}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-size:18px;width:36px;text-align:center;flex-shrink:0;font-family:'Courier New',monospace;font-weight:900}
+.lb-info{flex:1}
+.lb-name{font-size:16px;font-weight:700;letter-spacing:1px}
+.lb-sub{font-size:10px;color:#555;margin-top:2px;letter-spacing:1px;font-family:'Courier New',monospace}
+.lb-right{text-align:right}
+.lb-score{font-size:28px;font-weight:900;font-family:'Courier New',monospace}
+.lb-behind{font-size:10px;color:#555;font-family:'Courier New',monospace;margin-top:2px}
+.score-bar-wrap{margin:6px 0 0}
+.score-bar-track{background:#1a1a1a;border-radius:3px;height:5px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px}
+.empty-state{text-align:center;padding:48px 20px;color:#333;font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;line-height:2.2}
+/* STATS */
+.owner-card{background:#111;border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:12px}
+.owner-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:2px solid}
+.owner-card-hdr-left{display:flex;align-items:center;gap:8px}
+.owner-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.owner-card-name{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace}
+.owner-card-total{font-family:'Courier New',monospace;font-size:20px;font-weight:900;color:#FFC72C}
+.owner-card-total .pts-lbl{font-size:9px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-left:3px}
+.stat-col-hdr{display:grid;grid-template-columns:1fr 40px 40px 40px 44px 50px;gap:4px;padding:5px 14px;background:#0d0d0d}
+.stat-col-hdr span{font-size:9px;font-weight:700;letter-spacing:1px;color:#444;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
+.stat-col-hdr span:first-child{text-align:left}
+.player-row{display:grid;grid-template-columns:1fr 40px 40px 40px 44px 50px;gap:4px;align-items:center;padding:9px 14px;border-bottom:1px solid #1a1a1a}
+.player-row:last-child{border-bottom:none}
+.player-row.star-row{background:rgba(255,199,44,0.04)}
+.player-row.zero-row{opacity:0.35}
+.p-name{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;overflow:hidden}
+.p-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
+.star-ico{color:#FFC72C;font-size:11px;flex-shrink:0}
+.stat-cell{font-family:'Courier New',monospace;font-size:13px;font-weight:700;text-align:center;color:#ccc}
+.stat-cell.zero{color:#2a2a2a}
+.stat-cell.dash{color:#2a2a2a;font-size:11px}
+.total-cell{font-family:'Courier New',monospace;font-size:15px;font-weight:900;text-align:right}
+.gp-cell{font-family:'Courier New',monospace;font-size:11px;color:#444;text-align:center}
+/* GAME LOG */
+.gl-owner-block{margin-bottom:16px}
+.gl-owner-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:6px 6px 0 0;border-left:3px solid;background:#111}
+.gl-owner-hdr-name{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace}
+.gl-owner-players{background:#111;border:1px solid #222;border-top:none;border-radius:0 0 6px 6px;overflow:hidden}
+.gl-player-btn{width:100%;background:none;border:none;color:#ddd;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;font-family:'Courier New',monospace;font-size:12px;font-weight:600;border-bottom:1px solid #1a1a1a;transition:background 0.1s;text-align:left;letter-spacing:1px}
+.gl-player-btn:hover{background:#161616}
+.gl-player-btn.open{background:#161616}
+.gl-player-btn:last-of-type{border-bottom:none}
+.gl-player-btn-left{display:flex;align-items:center;gap:7px}
+.gl-player-btn-right{display:flex;align-items:center;gap:10px}
+.gl-player-gp{font-size:9px;color:#444;letter-spacing:1px;font-family:'Courier New',monospace}
+.gl-player-score{font-size:15px;font-weight:900;color:#FFC72C;font-family:'Courier New',monospace}
+.gl-chevron{font-size:9px;color:#444;transition:transform 0.2s;margin-left:2px}
+.gl-player-btn.open .gl-chevron{transform:rotate(90deg)}
+.gl-player-detail{display:none;background:#080808;border-bottom:1px solid #1a1a1a}
+.gl-player-detail.open{display:block}
+.gl-round-block{padding:10px 14px 6px}
+.gl-round-label{font-size:9px;font-weight:700;letter-spacing:2px;color:#444;text-transform:uppercase;font-family:'Courier New',monospace;padding-bottom:6px;border-bottom:1px solid #1a1a1a;margin-bottom:6px}
+.gl-game-hdr{display:grid;grid-template-columns:94px 1fr 1fr 1fr 64px;gap:6px;padding:3px 2px 5px}
+.gl-game-hdr span{font-size:9px;color:#333;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
+.gl-game-hdr span:first-child{text-align:left}
+.gl-game-row{display:grid;grid-template-columns:94px 1fr 1fr 1fr 64px;gap:6px;padding:7px 2px;border-bottom:1px dashed #1a1a1a;align-items:center}
+.gl-game-row:last-child{border-bottom:none}
+.gl-g-date{font-size:11px;color:#555;font-family:'Courier New',monospace}
+.gl-g-stat{font-family:'Courier New',monospace;font-size:14px;font-weight:700;text-align:center;color:#ccc}
+.gl-g-stat.zero{color:#2a2a2a}
+.gl-g-stat.dash{color:#2a2a2a;font-size:11px}
+.elim-row{}
+.skull-ico{font-size:11px;margin-left:4px;opacity:0.7}
+.injury-ico{display:inline-flex;align-items:center;vertical-align:middle}
+.gl-g-total{font-family:'Courier New',monospace;font-size:15px;font-weight:900;text-align:right}
+.gl-bonus-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;margin:4px 2px;background:rgba(255,199,44,0.08);border:1px solid rgba(255,199,44,0.2);border-radius:4px}
+.gl-bonus-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;color:#FFC72C}
+.gl-bonus-pts{font-family:'Courier New',monospace;font-size:15px;font-weight:900;color:#FFC72C}
+</style>
+</head>
+<body>
+<div id="wipe"></div>
+
+<div id="transition">
+  <div class="trans-scanline"></div>
+  <div class="trans-bg"></div>
+  <div class="trans-title">NBA PLAYOFF CHALLENGE 2026</div>
+  <div class="trans-stage">
+    <div class="trans-coach" id="trans-coach">
+      <img src="https://rarel12.github.io/nba2026challenge/coach.jpg" alt="Coach"/>
+      <div class="trans-coach-glow"></div>
+      <div class="trans-coach-side"></div>
+    </div>
+    <div class="trans-right">
+      <div class="trans-bubble-wrap" id="trans-bubble">
+        <div class="trans-bubble">
+          <div class="trans-quote">"It's not where you start, it's where you finish.."</div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="trans-corner-tl"></div>
+  <div class="trans-corner-tr"></div>
+  <div class="trans-corner-bl"></div>
+  <div class="trans-corner-br"></div>
+  <div class="trans-bar" id="trans-bar"></div>
+</div>
+<div id="intro">
+  <div class="scanline"></div>
+  <div class="pixel-border" style="margin-bottom:10px">
+    <div class="pb" style="background:#E63A1E"></div><div class="pb" style="background:#E63A1E"></div>
+    <div class="pb" style="background:#fff"></div><div class="pb" style="background:#fff"></div>
+    <div class="pb" style="background:#1E90FF"></div><div class="pb" style="background:#1E90FF"></div>
+    <div class="pb" style="background:#E63A1E"></div><div class="pb" style="background:#E63A1E"></div>
+    <div class="pb" style="background:#fff"></div><div class="pb" style="background:#fff"></div>
+    <div class="pb" style="background:#1E90FF"></div><div class="pb" style="background:#1E90FF"></div>
+    <div class="pb" style="background:#E63A1E"></div><div class="pb" style="background:#E63A1E"></div>
+  </div>
+  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="116" viewBox="0 0 80 116" style="margin-bottom:8px;image-rendering:pixelated;shape-rendering:crispEdges">
+    <rect x="24" y="0" width="32" height="4" fill="#FFC72C"/><rect x="20" y="4" width="40" height="4" fill="#FFD700"/>
+    <rect x="16" y="8" width="48" height="4" fill="#FFC72C"/><rect x="12" y="12" width="56" height="4" fill="#FFD700"/>
+    <rect x="8" y="16" width="64" height="4" fill="#FFC72C"/><rect x="8" y="20" width="64" height="4" fill="#FFD700"/>
+    <rect x="8" y="24" width="4" height="4" fill="#FFD700"/><rect x="12" y="24" width="56" height="4" fill="#FFC72C"/>
+    <rect x="68" y="24" width="4" height="4" fill="#FFD700"/><rect x="4" y="28" width="4" height="4" fill="#FFD700"/>
+    <rect x="8" y="28" width="64" height="4" fill="#FFC72C"/><rect x="72" y="28" width="4" height="4" fill="#FFD700"/>
+    <rect x="4" y="32" width="72" height="4" fill="#FFD700"/><rect x="8" y="32" width="4" height="4" fill="#8A6200"/>
+    <rect x="60" y="32" width="4" height="4" fill="#8A6200"/><rect x="4" y="36" width="4" height="4" fill="#FFC72C"/>
+    <rect x="8" y="36" width="64" height="4" fill="#FFD700"/><rect x="72" y="36" width="4" height="4" fill="#FFC72C"/>
+    <rect x="4" y="40" width="4" height="4" fill="#FFD700"/><rect x="8" y="40" width="64" height="4" fill="#FFC72C"/>
+    <rect x="72" y="40" width="4" height="4" fill="#FFD700"/><rect x="8" y="44" width="4" height="4" fill="#FFD700"/>
+    <rect x="12" y="44" width="56" height="4" fill="#FFD700"/><rect x="68" y="44" width="4" height="4" fill="#FFD700"/>
+    <rect x="24" y="44" width="4" height="4" fill="#8A6200"/><rect x="52" y="44" width="4" height="4" fill="#8A6200"/>
+    <rect x="12" y="48" width="56" height="4" fill="#FFC72C"/><rect x="16" y="52" width="48" height="4" fill="#FFD700"/>
+    <rect x="20" y="52" width="4" height="4" fill="#8A6200"/><rect x="56" y="52" width="4" height="4" fill="#8A6200"/>
+    <rect x="20" y="56" width="40" height="4" fill="#FFC72C"/><rect x="24" y="56" width="4" height="4" fill="#8A6200"/>
+    <rect x="52" y="56" width="4" height="4" fill="#8A6200"/><rect x="20" y="60" width="40" height="4" fill="#FFD700"/>
+    <rect x="16" y="64" width="48" height="4" fill="#FFC72C"/><rect x="20" y="64" width="4" height="4" fill="#8A6200"/>
+    <rect x="56" y="64" width="4" height="4" fill="#8A6200"/><rect x="16" y="68" width="48" height="4" fill="#FFD700"/>
+    <rect x="24" y="68" width="4" height="4" fill="#8A6200"/><rect x="52" y="68" width="4" height="4" fill="#8A6200"/>
+    <rect x="16" y="72" width="48" height="4" fill="#FFC72C"/><rect x="20" y="72" width="4" height="4" fill="#8A6200"/>
+    <rect x="56" y="72" width="4" height="4" fill="#8A6200"/><rect x="16" y="76" width="48" height="4" fill="#FFD700"/>
+    <rect x="24" y="76" width="4" height="4" fill="#8A6200"/><rect x="52" y="76" width="4" height="4" fill="#8A6200"/>
+    <rect x="16" y="80" width="48" height="4" fill="#FFC72C"/><rect x="20" y="80" width="4" height="4" fill="#8A6200"/>
+    <rect x="56" y="80" width="4" height="4" fill="#8A6200"/><rect x="20" y="84" width="40" height="4" fill="#8A6200"/>
+    <rect x="24" y="88" width="32" height="4" fill="#FFC72C"/><rect x="24" y="92" width="32" height="4" fill="#FFD700"/>
+    <rect x="12" y="96" width="56" height="4" fill="#FFC72C"/><rect x="12" y="100" width="56" height="4" fill="#FFD700"/>
+    <rect x="8" y="104" width="64" height="4" fill="#8A6200"/><rect x="4" y="108" width="72" height="4" fill="#FFC72C"/>
+    <rect x="4" y="112" width="72" height="4" fill="#FFD700"/><rect x="28" y="8" width="8" height="4" fill="#fff" opacity="0.5"/>
+    <rect x="24" y="12" width="4" height="4" fill="#fff" opacity="0.3"/>
+  </svg>
+  <div class="title-nba">NBA</div>
+  <div class="title-playoff">PLAYOFF</div>
+  <div class="title-challenge">Challenge</div>
+  <div class="title-year">2026</div>
+  <div class="pixel-border" style="margin-top:14px">
+    <div class="pb" style="background:#E63A1E"></div><div class="pb" style="background:#E63A1E"></div>
+    <div class="pb" style="background:#fff"></div><div class="pb" style="background:#fff"></div>
+    <div class="pb" style="background:#1E90FF"></div><div class="pb" style="background:#1E90FF"></div>
+    <div class="pb" style="background:#E63A1E"></div><div class="pb" style="background:#E63A1E"></div>
+    <div class="pb" style="background:#fff"></div><div class="pb" style="background:#fff"></div>
+    <div class="pb" style="background:#1E90FF"></div><div class="pb" style="background:#1E90FF"></div>
+    <div class="pb" style="background:#E63A1E"></div><div class="pb" style="background:#E63A1E"></div>
+  </div>
+  <button id="press-btn" onclick="startApp()">PRESS START</button>
+  <div class="bottom-strip">
+    <div class="coin-text">INSERT COIN TO PLAY</div>
+    <div class="mode-text">4-PLAYER MODE</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="app-bar">
+    <div class="app-title">NBA Playoff Challenge 2026</div>
+    <div class="round-pill">1ST ROUND</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('leaderboard',this)">Standings</button>
+    <button class="tab-btn" onclick="showTab('stats',this)">Stats</button>
+    <button class="tab-btn" onclick="showTab('gamelog',this)">Game Log</button>
+  </div>
+  <div id="leaderboard" class="section active">
+    <div class="status-bar">
+      <div class="status-text" id="lb-status">Loading live data...</div>
+      <div class="status-live">LIVE</div>
+    </div>
+    <div class="lb-card">
+      <div class="lb-header">
+        <div class="lb-header-text">Owner Standings</div>
+        <div class="lb-header-text" style="color:#555">Total Score</div>
+      </div>
+      <div id="lb-rows"></div>
+    </div>
+  </div>
+  <div id="stats" class="section">
+    <div class="status-bar">
+      <div class="status-text" id="stats-status">Loading stats...</div>
+      <div class="status-live">LIVE</div>
+    </div>
+    <div id="stats-rows"></div>
+  </div>
+  <div id="gamelog" class="section">
+    <div class="status-bar">
+      <div class="status-text" id="gl-status">Loading game log...</div>
+      <div class="status-live">LIVE</div>
+    </div>
+    <div id="gl-rows"></div>
+  </div>
+</div>
+
+<script>
+const LB_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=622670601&single=true&output=csv';
+const PL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=691090051&single=true&output=csv';
+const GL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=100966476&single=true&output=csv';
+const RT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=140648245&single=true&output=csv';
+const OWNER_COLORS={'KMART':'#4ab3f4','The Fanchise':'#63c754','Mr. HUSTLE':'#E63A1E','AIR-EL':'#b57bee'};
+const OWNER_ORDER=['KMART','The Fanchise','Mr. HUSTLE','AIR-EL'];
+const MEDALS=['#FFD700','#C0C0C0','#CD7F32','#666'];
+const MEDAL_LABELS=['1ST','2ND','3RD','4TH'];
+let glData=[];
+let playerStatus={};
+let playerStar={};
+
+function splitCSVLine(line){
+  const r=[];let c='';let q=false;
+  for(let ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}
+  r.push(c);return r;
+}
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  const headers=splitCSVLine(lines[0]).map(h=>h.replace(/"/g,'').trim());
+  return lines.slice(1).map(line=>{
+    const vals=splitCSVLine(line);const obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/"/g,'').trim());
+    return obj;
+  });
+}
+function parseLeaderboardCSV(text){
+  const lines=text.trim().split('\n');let hi=0;
+  for(let i=0;i<lines.length;i++){if(lines[i].toLowerCase().includes('owner')){hi=i;break;}}
+  const headers=splitCSVLine(lines[hi]).map(h=>h.replace(/"/g,'').trim());
+  return lines.slice(hi+1).map(line=>{
+    const vals=splitCSVLine(line);const obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/"/g,'').trim());
+    return obj;
+  });
+}
+function parseRunningTotals(text){
+  const lines=text.trim().split('\n');let hi=0;
+  for(let i=0;i<lines.length;i++){
+    const low=lines[i].toLowerCase();
+    if(low.includes('player')&&low.includes('owner')){hi=i;break;}
+  }
+  const headers=splitCSVLine(lines[hi]).map(h=>h.replace(/"/g,'').trim());
+  const rows=[];
+  for(let i=hi+1;i<lines.length;i++){
+    const vals=splitCSVLine(lines[i]);const obj={};
+    headers.forEach((h,k)=>obj[h]=(vals[k]||'').replace(/"/g,'').trim());
+    if(obj['Player Name']&&obj['Owner']&&OWNER_ORDER.includes(obj['Owner']))rows.push(obj);
+  }
+  return rows;
+}
+
+function startApp(){
+  const w=document.getElementById('wipe');
+  w.style.display='block';w.style.transform='translateX(-100%)';w.style.transition='transform 0.25s ease-in';
+  requestAnimationFrame(()=>{
+    w.style.transform='translateX(0)';
+    setTimeout(()=>{
+      document.getElementById('intro').style.display='none';
+      document.getElementById('transition').style.display='block';
+      w.style.transition='transform 0.25s ease-out';w.style.transform='translateX(100%)';
+      setTimeout(()=>{w.style.display='none';},260);
+      // Coach animates in
+      setTimeout(()=>{document.getElementById('trans-coach').classList.add('in');},300);
+      // Quote appears after coach
+      setTimeout(()=>{document.getElementById('trans-bubble').classList.add('in');},900);
+      // Progress bar starts
+      setTimeout(()=>{document.getElementById('trans-bar').classList.add('go');},300);
+      // Advance to app after 3 seconds
+      setTimeout(()=>{
+        const w2=document.getElementById('wipe');
+        w2.style.display='block';w2.style.transform='translateX(-100%)';w2.style.transition='transform 0.25s ease-in';
+        requestAnimationFrame(()=>{
+          w2.style.transform='translateX(0)';
+          setTimeout(()=>{
+            document.getElementById('transition').style.display='none';
+            document.getElementById('app').style.display='block';
+            w2.style.transition='transform 0.25s ease-out';w2.style.transform='translateX(100%)';
+            setTimeout(()=>{w2.style.display='none';},260);
+            loadData();
+          },260);
+        });
+      },3600);
+    },260);
+  });
+}
+
+async function loadData(){
+  try{
+    const [lbR,glR,rtR,plR]=await Promise.all([fetch(LB_URL),fetch(GL_URL),fetch(RT_URL),fetch(PL_URL)]);
+    const [lbT,glT,rtT,plT]=await Promise.all([lbR.text(),glR.text(),rtR.text(),plR.text()]);
+    const lbRows=parseLeaderboardCSV(lbT);
+    glData=parseCSV(glT).filter(r=>r['Player']&&r['Player']!=='Waiting for first game data...'&&r['Player']!=='Player');
+    const rtRows=parseRunningTotals(rtT);
+    // Build player status lookup from Players tab
+    playerStatus={};
+    const plLines=plT.trim().split('\n');
+    let plHi=0;
+    for(let i=0;i<plLines.length;i++){
+      const low=plLines[i].toLowerCase();
+      if(low.includes('player name')&&low.includes('status')){plHi=i;break;}
+    }
+    const plHeaders=splitCSVLine(plLines[plHi]).map(h=>h.replace(/"/g,'').trim());
+    plLines.slice(plHi+1).forEach(line=>{
+      const vals=splitCSVLine(line);
+      const obj={};
+      plHeaders.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/"/g,'').trim());
+      const name=(obj['Player Name']||'').trim();
+      const status=(obj['Status']||'').trim();
+      const star=(obj['Star Player']||'').trim();
+      if(name){playerStatus[name]=status;playerStar[name]=star;}
+    });
+    renderLeaderboard(lbRows);
+    renderStats(rtRows);
+    renderGameLog(glData);
+    const ts='Updated: '+new Date().toLocaleTimeString();
+    ['lb-status','stats-status','gl-status'].forEach(id=>document.getElementById(id).textContent=ts);
+  }catch(e){
+    console.error(e);
+    ['lb-status','stats-status','gl-status'].forEach(id=>
+      document.getElementById(id).textContent='Error loading — try refreshing'
+    );
+  }
+}
+
+function renderLeaderboard(rows){
+  const totals={};
+  rows.forEach(r=>{
+    const o=(r['Owner']||'').trim();const s=parseFloat(r['Total Score']||0);
+    if(OWNER_ORDER.includes(o)&&!isNaN(s))totals[o]=s;
+  });
+  const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  if(!sorted.length){
+    document.getElementById('lb-rows').innerHTML='<div class="empty-state">Standings update after first game</div>';
+    return;
+  }
+  const max=sorted[0][1]||1;
+  document.getElementById('lb-rows').innerHTML=sorted.map(([owner,score],i)=>{
+    const color=OWNER_COLORS[owner]||'#888';
+    const behind=i===0?'LEADER':'-'+Math.round(max-score)+' PTS';
+    const pct=Math.round((score/max)*100);
+    return `<div class="lb-row">
+      <div class="lb-rank" style="color:${MEDALS[i]}">${MEDAL_LABELS[i]}</div>
+      <div class="lb-info">
+        <div class="lb-name" style="color:${color}">${owner}</div>
+        <div class="lb-sub">${behind}</div>
+        <div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
+      </div>
+      <div class="lb-right">
+        <div class="lb-score" style="color:${color}">${Math.round(score)}</div>
+        <div class="lb-behind">pts</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStats(rows){
+  if(!rows.length){
+    document.getElementById('stats-rows').innerHTML='<div class="empty-state">Stats populate after first game</div>';
+    return;
+  }
+  // Group by owner preserving sheet order
+  const grouped={};
+  OWNER_ORDER.forEach(o=>grouped[o]=[]);
+  rows.forEach(r=>{if(grouped[r['Owner']])grouped[r['Owner']].push(r);});
+
+  let html='';
+  OWNER_ORDER.forEach(owner=>{
+    const players=grouped[owner];
+    if(!players.length)return;
+    const color=OWNER_COLORS[owner]||'#888';
+    const ownerTotal=players.reduce((s,p)=>s+(parseFloat(p['Grand Total'])||0),0);
+
+    html+=`<div class="owner-card">
+      <div class="owner-card-hdr" style="border-color:${color}">
+        <div class="owner-card-hdr-left">
+          <div class="owner-dot" style="background:${color}"></div>
+          <div class="owner-card-name" style="color:${color}">${owner}</div>
+        </div>
+        <div class="owner-card-total">${Math.round(ownerTotal)}<span class="pts-lbl">PTS</span></div>
+      </div>
+      <div class="stat-col-hdr">
+        <span>Player</span><span>PTS</span><span>REB</span><span>AST</span><span style="color:#FFC72C">BON</span><span>Total</span>
+      </div>`;
+
+    players.forEach(p=>{
+      const pts=parseInt(p['Total Pts']||0);
+      const reb=parseInt(p['Total Reb']||0);
+      const ast=parseInt(p['Total Ast']||0);
+      const bon=parseInt(p['Series Bonus']||0);
+      const total=parseFloat(p['Grand Total']||0);
+      const gp=parseInt(p['Games Played']||0);
+      const isStar=(playerStar[p['Player Name']]||'')==='Yes';
+      const hasStarStats=(reb>0||ast>0);
+      const isZero=(gp===0&&bon===0);
+      const isElim=(playerStatus[p['Player Name']]||'').trim()==='Eliminated';
+      const isInjured=(playerStatus[p['Player Name']]||'').trim()==='Injured';
+      const rowCls='player-row'+(isStar?' star-row':'')+(isZero?' zero-row':'')+(isElim?' elim-row':'');
+      html+=`<div class="${rowCls}">
+        <div class="p-name">
+          ${isStar?'<span class="star-ico">★</span>':''}
+          <span class="p-name-text">${p['Player Name']||''}</span>
+          ${isElim?'<span class="skull-ico">💀</span>':''}
+          ${isInjured?'<span class="injury-ico">🩹</span>':''}
+        </div>
+        <div class="stat-cell${pts===0?' zero':''}">${pts}</div>
+        <div class="${(isStar||hasStarStats)?'stat-cell'+(reb===0?' zero':''):'stat-cell dash'}">${(isStar||hasStarStats)?reb:'—'}</div>
+        <div class="${(isStar||hasStarStats)?'stat-cell'+(ast===0?' zero':''):'stat-cell dash'}">${(isStar||hasStarStats)?ast:'—'}</div>
+        <div class="stat-cell" style="${bon>0?'color:#FFC72C':''}">${bon>0?bon:'—'}</div>
+        <div class="total-cell" style="color:${total>0?color:'#2a2a2a'}">${Math.round(total)}</div>
+      </div>`;
+    });
+
+    html+='</div>';
+  });
+  document.getElementById('stats-rows').innerHTML=html;
+}
+
+function renderGameLog(data){
+  if(!data.length){
+    document.getElementById('gl-rows').innerHTML='<div class="empty-state">Game log populates after first game</div>';
+    return;
+  }
+  // owner -> player -> round -> [games]
+  const ownerMap={};
+  OWNER_ORDER.forEach(o=>ownerMap[o]={});
+  data.forEach(r=>{
+    const owner=r['Owner']||'';const player=r['Player']||'';const round=r['Round']||'1st Round';
+    if(!ownerMap[owner])return;
+    if(!ownerMap[owner][player])ownerMap[owner][player]={};
+    if(!ownerMap[owner][player][round])ownerMap[owner][player][round]=[];
+    ownerMap[owner][player][round].push(r);
+  });
+
+  let html='';
+  OWNER_ORDER.forEach(owner=>{
+    const players=ownerMap[owner];
+    if(!Object.keys(players).length)return;
+    const color=OWNER_COLORS[owner]||'#888';
+    html+=`<div class="gl-owner-block">
+      <div class="gl-owner-hdr" style="border-color:${color}">
+        <div class="owner-dot" style="background:${color}"></div>
+        <div class="gl-owner-hdr-name" style="color:${color}">${owner}</div>
+      </div>
+      <div class="gl-owner-players">`;
+
+    Object.entries(players).forEach(([player,rounds])=>{
+      const star=(playerStar[player]||'')==='Yes';
+      let totalScore=0,totalGP=0;
+      Object.values(rounds).forEach(games=>games.forEach(g=>{
+        const isBonus=(g['Game #']||'').toString().trim()==='Sweep Bonus';
+        totalScore+=parseFloat(g['Total']||0)||(parseInt(g['PTS']||0)+parseInt(g['REB']||0)+parseInt(g['AST']||0));
+        if(!isBonus)totalGP++;
+      }));
+      const pid='gl-'+(owner+player).replace(/[^a-zA-Z0-9]/g,'');
+      const isElimGL=(playerStatus[player]||'').trim()==='Eliminated';
+      const isInjuredGL=(playerStatus[player]||'').trim()==='Injured';
+      html+=`<button class="gl-player-btn${isElimGL?' elim-row':''}" onclick="togglePlayer('${pid}',this)">
+        <div class="gl-player-btn-left">
+          <span style="color:#FFC72C;font-size:11px;width:14px;display:inline-block">${star?'★':''}</span>
+          <span>${player}</span>
+          ${isElimGL?'<span class="skull-ico">💀</span>':''}
+          ${isInjuredGL?'<span class="injury-ico">🩹</span>':''}
+        </div>
+        <div class="gl-player-btn-right">
+          <span class="gl-player-gp">${totalGP}G</span>
+          <span class="gl-player-score">${Math.round(totalScore)}</span>
+          <span class="gl-chevron">▶</span>
+        </div>
+      </button>
+      <div class="gl-player-detail" id="${pid}">`;
+
+      Object.entries(rounds).forEach(([round,games])=>{
+        html+=`<div class="gl-round-block">
+          <div class="gl-round-label">${round}</div>
+          <div class="gl-game-hdr"><span>Date</span><span>PTS</span><span>REB</span><span>AST</span><span>Total</span></div>`;
+        games.forEach((g,idx)=>{
+          const isBonus=(g['Game #']||'').toString().trim()==='Sweep Bonus';
+          if(isBonus){
+            const total=parseFloat(g['Total']||0);
+            const date=g['Date']||'';
+            html+=`<div class="gl-bonus-row">
+              <div class="gl-bonus-label">🏆 Sweep Bonus${date?' — '+date:''}</div>
+              <div class="gl-bonus-pts">+${Math.round(total)}</div>
+            </div>`;
+            return;
+          }
+          const pts=parseInt(g['PTS']||0);
+          const reb=parseInt(g['REB']||0);
+          const ast=parseInt(g['AST']||0);
+          const total=parseFloat(g['Total']||0)||(pts+reb+ast);
+          const date=g['Date']||('Game '+(idx+1));
+          const showStats=star||(reb>0||ast>0);
+          html+=`<div class="gl-game-row">
+            <div class="gl-g-date">${date}</div>
+            <div class="gl-g-stat${pts===0?' zero':''}">${pts}</div>
+            <div class="${showStats?'gl-g-stat'+(reb===0?' zero':''):'gl-g-stat dash'}">${showStats?reb:'—'}</div>
+            <div class="${showStats?'gl-g-stat'+(ast===0?' zero':''):'gl-g-stat dash'}">${showStats?ast:'—'}</div>
+            <div class="gl-g-total" style="color:${total>0?color:'#2a2a2a'}">${Math.round(total)}</div>
+          </div>`;
+        });
+        html+='</div>';
+      });
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('gl-rows').innerHTML=html;
+}
+
+function togglePlayer(id,btn){
+  const d=document.getElementById(id);const open=d.classList.contains('open');
+  d.classList.toggle('open',!open);btn.classList.toggle('open',!open);
+}
+function showTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+}
+</script>
+</body>
+</html>
