@@ -78,14 +78,15 @@ body{background:#000;min-height:100vh}
 .trans-bar{position:absolute;bottom:0;left:0;height:5px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
 .trans-bar.go{width:100%}
 @media(max-width:600px){
-  .trans-stage{flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:60px;gap:0}
-  .trans-coach img{height:58vh;max-height:420px}
+  .trans-stage{flex-direction:column;align-items:center;justify-content:center;padding:60px 0 20px;gap:0}
+  .trans-coach img{height:48vh;max-height:340px}
   .trans-right{padding:0 20px;width:100%}
-  .trans-bubble::before{left:50%;top:-26px;transform:translateX(-50%);border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:26px solid #000;border-top:none}
-  .trans-bubble::after{left:50%;top:-18px;transform:translateX(-50%);border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:20px solid #fff;border-top:none}
-  .trans-quote{font-size:14px}
+  .trans-bubble{padding:14px 18px}
+  .trans-bubble::before{left:50%;top:-22px;transform:translateX(-50%);border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:22px solid #000;border-top:none}
+  .trans-bubble::after{left:50%;top:-15px;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:17px solid #fff;border-top:none}
+  .trans-quote{font-size:13px;letter-spacing:0}
   .trans-coach-side{display:none}
-  .trans-coach-glow{height:100px}
+  .trans-coach-glow{height:80px}
 }
 .app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
 .app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase}
