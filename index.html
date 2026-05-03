@@ -25,69 +25,11 @@ body{background:#000;min-height:100vh}
 .coin-text{font-size:11px;color:#E63A1E;font-family:'Courier New',monospace;letter-spacing:3px;text-transform:uppercase}
 .mode-text{font-size:9px;color:#555;font-family:'Courier New',monospace;letter-spacing:2px;text-transform:uppercase}
 #wipe{position:fixed;inset:0;background:#E63A1E;z-index:999;display:none;transform:translateX(-100%)}
-#transition{display:none;position:fixed;inset:0;background:#000;z-index:50;font-family:'Courier New',monospace;overflow:hidden}
-.trans-scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.12) 3px,rgba(0,0,0,0.12) 4px);pointer-events:none;z-index:10}
-.trans-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,#1a0a00 0%,#000 70%)}
-.trans-stage{position:relative;z-index:6;width:100%;height:100vh;display:flex;align-items:center;justify-content:center;gap:0;padding:0}
-.trans-coach{opacity:0;transform:translateX(-80px);transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.16,1,0.3,1);position:relative;flex-shrink:0}
-.trans-coach.in{opacity:1;transform:translateX(0)}
-.trans-coach img{
-  height:88vh;
-  max-height:680px;
-  width:auto;
-  object-fit:contain;
-  object-position:center top;
-  filter:
-    contrast(1.8)
-    brightness(1.1)
-    saturate(0.2)
-    sepia(0.3);
-  -webkit-filter:
-    contrast(1.8)
-    brightness(1.1)
-    saturate(0.2)
-    sepia(0.3);
-}
-.trans-coach-glow{
-  position:absolute;
-  left:0;bottom:0;right:0;
-  height:180px;
-  background:linear-gradient(to top,#000 30%,transparent);
-  pointer-events:none;
-}
-.trans-coach-side{
-  position:absolute;
-  right:-20px;top:0;bottom:0;
-  width:60px;
-  background:linear-gradient(to right,transparent,#000);
-  pointer-events:none;
-}
-.trans-right{display:flex;flex-direction:column;justify-content:center;padding:0 40px 0 20px;max-width:380px;flex-shrink:0}
-.trans-bubble-wrap{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease}
-.trans-bubble-wrap.in{opacity:1;transform:translateY(0)}
-.trans-bubble{background:#fff;border:5px solid #000;padding:24px 28px;position:relative;box-shadow:8px 8px 0 #000,12px 12px 0 rgba(255,199,44,0.3)}
-.trans-bubble::before{content:'';position:absolute;left:-30px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:16px solid transparent;border-bottom:16px solid transparent;border-right:30px solid #000}
-.trans-bubble::after{content:'';position:absolute;left:-22px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-right:22px solid #fff}
-.trans-quote{font-size:17px;font-weight:900;color:#000;font-family:'Courier New',monospace;letter-spacing:0.5px;line-height:1.5;text-transform:uppercase}
-.trans-attr{font-size:10px;color:#888;margin-top:10px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace}
-.trans-title{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:10px;color:#FFC72C;letter-spacing:5px;text-transform:uppercase;font-family:'Courier New',monospace;white-space:nowrap;z-index:10}
-.trans-corner-tl{position:absolute;top:16px;left:16px;width:30px;height:30px;border-top:3px solid #FFC72C;border-left:3px solid #FFC72C;z-index:10}
-.trans-corner-tr{position:absolute;top:16px;right:16px;width:30px;height:30px;border-top:3px solid #FFC72C;border-right:3px solid #FFC72C;z-index:10}
-.trans-corner-bl{position:absolute;bottom:20px;left:16px;width:30px;height:30px;border-bottom:3px solid #FFC72C;border-left:3px solid #FFC72C;z-index:10}
-.trans-corner-br{position:absolute;bottom:20px;right:16px;width:30px;height:30px;border-bottom:3px solid #FFC72C;border-right:3px solid #FFC72C;z-index:10}
-.trans-bar{position:absolute;bottom:0;left:0;height:5px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
+#transition{display:none;position:fixed;inset:0;background:#000;z-index:50;overflow:hidden}
+.trans-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:0;transition:opacity 0.6s ease}
+.trans-img.in{opacity:1}
+.trans-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
 .trans-bar.go{width:100%}
-@media(max-width:600px){
-  .trans-stage{flex-direction:column;align-items:center;justify-content:center;padding:60px 0 20px;gap:0}
-  .trans-coach img{height:48vh;max-height:340px}
-  .trans-right{padding:0 20px;width:100%}
-  .trans-bubble{padding:14px 18px}
-  .trans-bubble::before{left:50%;top:-22px;transform:translateX(-50%);border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:22px solid #000;border-top:none}
-  .trans-bubble::after{left:50%;top:-15px;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:17px solid #fff;border-top:none}
-  .trans-quote{font-size:13px;letter-spacing:0}
-  .trans-coach-side{display:none}
-  .trans-coach-glow{height:80px}
-}
 .app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
 .app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase}
 .round-pill{background:rgba(255,199,44,0.15);color:#FFC72C;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,199,44,0.3);letter-spacing:1px}
@@ -180,28 +122,7 @@ body{background:#000;min-height:100vh}
 <div id="wipe"></div>
 
 <div id="transition">
-  <div class="trans-scanline"></div>
-  <div class="trans-bg"></div>
-  <div class="trans-title">NBA PLAYOFF CHALLENGE 2026</div>
-  <div class="trans-stage">
-    <div class="trans-coach" id="trans-coach">
-      <img src="https://rarel12.github.io/nba2026challenge/coach.jpg" alt="Coach"/>
-      <div class="trans-coach-glow"></div>
-      <div class="trans-coach-side"></div>
-    </div>
-    <div class="trans-right">
-      <div class="trans-bubble-wrap" id="trans-bubble">
-        <div class="trans-bubble">
-          <div class="trans-quote">"It's not where you start, it's where you finish.."</div>
-          
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="trans-corner-tl"></div>
-  <div class="trans-corner-tr"></div>
-  <div class="trans-corner-bl"></div>
-  <div class="trans-corner-br"></div>
+  <img class="trans-img" id="trans-img" src="https://rarel12.github.io/nba2026challenge/transition.png" alt=""/>
   <div class="trans-bar" id="trans-bar"></div>
 </div>
 <div id="intro">
@@ -369,12 +290,10 @@ function startApp(){
       document.getElementById('transition').style.display='block';
       w.style.transition='transform 0.25s ease-out';w.style.transform='translateX(100%)';
       setTimeout(()=>{w.style.display='none';},260);
-      // Coach animates in
-      setTimeout(()=>{document.getElementById('trans-coach').classList.add('in');},300);
-      // Quote appears after coach
-      setTimeout(()=>{document.getElementById('trans-bubble').classList.add('in');},900);
+      // Image fades in
+      setTimeout(()=>{document.getElementById('trans-img').classList.add('in');},100);
       // Progress bar starts
-      setTimeout(()=>{document.getElementById('trans-bar').classList.add('go');},300);
+      setTimeout(()=>{document.getElementById('trans-bar').classList.add('go');},100);
       // Advance to app after 3 seconds
       setTimeout(()=>{
         const w2=document.getElementById('wipe');
