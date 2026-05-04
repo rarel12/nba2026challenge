@@ -191,7 +191,7 @@ body{background:#000;min-height:100vh}
 <div id="app">
   <div class="app-bar">
     <div class="app-title">NBA Playoff Challenge 2026</div>
-    <div class="round-pill">1ST ROUND</div>
+    <div class="round-pill" id="round-pill">1ST ROUND</div>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="showTab('leaderboard',this)">Standings</button>
@@ -229,6 +229,7 @@ body{background:#000;min-height:100vh}
 
 <script>
 const LB_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=622670601&single=true&output=csv';
+const ST_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=445896293&single=true&output=csv';
 const PL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=691090051&single=true&output=csv';
 const GL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=100966476&single=true&output=csv';
 const RT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=140648245&single=true&output=csv';
@@ -315,8 +316,18 @@ function startApp(){
 
 async function loadData(){
   try{
-    const [lbR,glR,rtR,plR]=await Promise.all([fetch(LB_URL),fetch(GL_URL),fetch(RT_URL),fetch(PL_URL)]);
-    const [lbT,glT,rtT,plT]=await Promise.all([lbR.text(),glR.text(),rtR.text(),plR.text()]);
+    const [lbR,glR,rtR,plR,stR]=await Promise.all([fetch(LB_URL),fetch(GL_URL),fetch(RT_URL),fetch(PL_URL),fetch(ST_URL)]);
+    const [lbT,glT,rtT,plT,stT]=await Promise.all([lbR.text(),glR.text(),rtR.text(),plR.text(),stR.text()]);
+    // Pull current round from Settings tab
+    const stLines=stT.trim().split('\n');
+    let currentRound='1ST ROUND';
+    stLines.forEach(line=>{
+      if(line.toLowerCase().includes('current round')){
+        const parts=line.split(',');
+        if(parts[1])currentRound=(parts[1]||'').replace(/"/g,'').trim().toUpperCase();
+      }
+    });
+    document.getElementById('round-pill').textContent=currentRound;
     const lbRows=parseLeaderboardCSV(lbT);
     glData=parseCSV(glT).filter(r=>r['Player']&&r['Player']!=='Waiting for first game data...'&&r['Player']!=='Player');
     const rtRows=parseRunningTotals(rtT);
