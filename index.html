@@ -32,10 +32,12 @@ body{background:#000;min-height:100vh}
 .trans-bar.go{width:100%}
 .app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
 .app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase}
-.round-pill{background:rgba(255,199,44,0.15);color:#FFC72C;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,199,44,0.3);letter-spacing:1px;white-space:nowrap}
-@media(max-width:400px){
-  .app-title{font-size:10px;letter-spacing:1px}
-  .round-pill{font-size:9px;padding:3px 8px;letter-spacing:0}
+.round-pill{background:rgba(255,199,44,0.15);color:#FFC72C;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,199,44,0.3);letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:420px){
+  .app-title{font-size:10px;letter-spacing:0.5px}
+  .round-pill{font-size:9px;padding:2px 7px;letter-spacing:0}
   .app-bar{padding:10px 12px}
 }
 .tab-bar{display:flex;background:#001A3D}
