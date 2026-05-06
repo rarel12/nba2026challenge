@@ -284,6 +284,36 @@ body{background:#000;min-height:100vh}
 <script>
 const LB_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=622670601&single=true&output=csv';
 const LIVE_URL='https://script.google.com/macros/s/AKfycbzrzCiwalARquMGxKEFgRjeqPuku9GcVy_3K7WCAZLOEoOu0gfUeBxO_82m33pkhaHP/exec';
+const TRACKED=[
+  {name:'Shai Gilgeous-Alexander',owner:'KMART',team:'OKC',star:true},
+  {name:'Anthony Edwards',owner:'KMART',team:'MIN',star:false},
+  {name:'LeBron James',owner:'KMART',team:'LAL',star:false},
+  {name:'De'Aaron Fox',owner:'KMART',team:'SAS',star:false},
+  {name:'Evan Mobley',owner:'KMART',team:'CLE',star:false},
+  {name:'Jaylen Brown',owner:'KMART',team:'BOS',star:false},
+  {name:'Devin Booker',owner:'KMART',team:'PHX',star:false},
+  {name:'Jalen Brunson',owner:'The Fanchise',team:'NYK',star:true},
+  {name:'Jalen Duren',owner:'The Fanchise',team:'DET',star:false},
+  {name:'James Harden',owner:'The Fanchise',team:'CLE',star:false},
+  {name:'Nikola Jokic',owner:'The Fanchise',team:'DEN',star:false},
+  {name:'Jayson Tatum',owner:'The Fanchise',team:'BOS',star:false},
+  {name:'Aaron Gordon',owner:'The Fanchise',team:'DEN',star:false},
+  {name:'Payton Pritchard',owner:'The Fanchise',team:'BOS',star:false},
+  {name:'Cade Cunningham',owner:'Mr. HUSTLE',team:'DET',star:true},
+  {name:'Kevin Durant',owner:'Mr. HUSTLE',team:'HOU',star:false},
+  {name:'Karl-Anthony Towns',owner:'Mr. HUSTLE',team:'NYK',star:false},
+  {name:'Chet Holmgren',owner:'Mr. HUSTLE',team:'OKC',star:false},
+  {name:'Stephon Castle',owner:'Mr. HUSTLE',team:'SAS',star:false},
+  {name:'Jamal Murray',owner:'Mr. HUSTLE',team:'DEN',star:false},
+  {name:'Jalen Johnson',owner:'Mr. HUSTLE',team:'ATL',star:false},
+  {name:'Victor Wembanyama',owner:'AIR-EL',team:'SAS',star:false},
+  {name:'Donovan Mitchell',owner:'AIR-EL',team:'CLE',star:false},
+  {name:'Jalen Williams',owner:'AIR-EL',team:'OKC',star:false},
+  {name:'Tyrese Maxey',owner:'AIR-EL',team:'PHI',star:true},
+  {name:'Tobias Harris',owner:'AIR-EL',team:'DET',star:false},
+  {name:'Alperen Sengun',owner:'AIR-EL',team:'HOU',star:false},
+  {name:'Derrick White',owner:'AIR-EL',team:'BOS',star:false}
+];
 const SS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=126492487&single=true&output=csv';
 const ST_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=445896293&single=true&output=csv';
 const PL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=691090051&single=true&output=csv';
@@ -527,6 +557,31 @@ function renderBracket(games,ssRows){
 }
 
 function renderMatchups(games){
+  // Check if all games are completed from a previous day
+  const today=new Date();
+  const todayStr=today.toISOString().substring(0,10);
+  const hasActiveGames=games.some(g=>g.statusState==='in'||g.statusState==='pre');
+  const hasTodayGames=games.length>0;
+  
+  if(!hasTodayGames||(!hasActiveGames&&games.every(g=>g.statusState==='post'))){
+    // Check ESPN for upcoming games — if none show empty state
+    const allFinal=games.every(g=>g.statusState==='post');
+    if(!hasTodayGames||allFinal){
+      document.getElementById('tm-rows').innerHTML=`<div class="tm-empty">
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="34" fill="#E87722" stroke="#C45E0A" stroke-width="2"/>
+          <path d="M40 6 C40 6 40 74 40 74" fill="none" stroke="#8B3A00" stroke-width="2.5"/>
+          <path d="M6 40 C6 40 74 40 74 40" fill="none" stroke="#8B3A00" stroke-width="2.5"/>
+          <path d="M40 6 C20 18 12 34 12 50 C12 66 20 78 40 74" fill="none" stroke="#8B3A00" stroke-width="2.5"/>
+          <path d="M40 6 C60 18 68 34 68 50 C68 66 60 78 40 74" fill="none" stroke="#8B3A00" stroke-width="2.5"/>
+          <ellipse cx="30" cy="26" rx="9" ry="5" fill="#F09030" opacity="0.4" transform="rotate(-30 30 26)"/>
+        </svg>
+        <div class="tm-empty-text">Games tip off tonight<br>Check back closer to tip</div>
+      </div>`;
+      return;
+    }
+  }
+  
   if(!games.length){
     document.getElementById('tm-rows').innerHTML=`<div class="tm-empty">
       <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
@@ -567,11 +622,19 @@ function renderMatchups(games){
 
     const dotColor=isLive?'#22c55e':isPost?'#E63A1E':'#444';
     const scoreHTML=isPre?'':`<span class="tm-game-score">${game.awayScore} - ${game.homeScore}</span>`;
+    // Format tip time from UTC to local
+    let tipDisplay=game.status;
+    if(isPre&&game.date){
+      try{
+        const d=new Date(game.date);
+        tipDisplay=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});
+      }catch(e){tipDisplay=game.status;}
+    }
     const statusHTML=isLive
       ?`<span class="tm-game-status-live">Q${game.period} ${game.clock}</span>`
       :isPost
       ?`<span class="tm-game-status-final">FINAL</span>`
-      :`<span class="tm-game-status-pre">TIP ${game.status}</span>`;
+      :`<span class="tm-game-status-pre">${tipDisplay}</span>`;
 
     html+=`<div class="tm-game-card">`;
     if(game.seriesText){html+=`<div class="tm-series">${game.seriesText.toUpperCase()}</div>`;}
@@ -580,10 +643,14 @@ function renderMatchups(games){
       <div class="tm-game-right">${scoreHTML}${statusHTML}</div>
     </div>`;
 
-    if(game.players&&game.players.length){
-      // Group by owner
+    // For pre-game use TRACKED roster, for live/final use box score data
+    const playersToShow = isPre
+      ? TRACKED.filter(p=>p.team===game.homeTeam||p.team===game.awayTeam)
+      : (game.players||[]);
+
+    if(playersToShow.length){
       const byOwner={};
-      game.players.forEach(p=>{
+      playersToShow.forEach(p=>{
         if(!byOwner[p.owner])byOwner[p.owner]=[];
         byOwner[p.owner].push(p);
       });
@@ -604,7 +671,8 @@ function renderMatchups(games){
               </div>
             </div>
             <div class="tm-player-stats">
-              ${isPre?'<span class="tm-stat" style="color:#333">—</span>':statsHTML}
+              ${isPre?'<span class="tm-stat" style="color:#333">—</span>':''}
+              ${!isPre?statsHTML:''}
               ${!isPre?`<span class="tm-total" style="color:${color}">${p.total}</span>`:''}
             </div>
           </div>`;
