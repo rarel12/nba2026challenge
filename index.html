@@ -125,16 +125,16 @@ body{background:#000;min-height:100vh}
 .gl-bonus-pts{font-family:'Courier New',monospace;font-size:15px;font-weight:900;color:#FFC72C}
 /* BRACKET */
 .bracket-section{margin-top:20px}
-.bracket-conf-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;opacity:0.6}
+.bracket-conf-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;opacity:1}
 .bracket-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .bracket-card{border-radius:6px;padding:10px 12px}
 .bracket-team-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
 .bracket-team-row:last-of-type{border-bottom:none}
 .bracket-team-left{display:flex;align-items:center;gap:5px}
-.bracket-seed{font-size:9px;color:#444;font-family:'Courier New',monospace}
+.bracket-seed{font-size:9px;color:#888;font-family:'Courier New',monospace}
 .bracket-team{font-size:13px;font-weight:700}
 .bracket-wins{font-size:14px;font-weight:900;font-family:'Courier New',monospace}
-.bracket-next{font-size:8px;color:#333;margin-top:6px;text-align:center;letter-spacing:1px;font-family:'Courier New',monospace}
+.bracket-next{font-size:8px;color:#666;margin-top:6px;text-align:center;letter-spacing:1px;font-family:'Courier New',monospace}
 /* TODAY'S MATCHUPS */
 .tm-refresh{display:flex;align-items:center;gap:6px;font-size:9px;color:#555;letter-spacing:1px;font-family:'Courier New',monospace}
 .tm-live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse-green 2s ease infinite}
@@ -411,8 +411,17 @@ async function loadData(){
     renderLeaderboard(lbRows);
     renderStats(rtRows);
     renderGameLog(glData);
-    const ts='Updated: '+new Date().toLocaleTimeString();
+    // Use last script run time from Settings tab B10
+    let lastRun='';
+    stLines.forEach(line=>{
+      if(line.toLowerCase().includes('last script run')){
+        const parts=line.split(',');
+        if(parts[1])lastRun=(parts[1]||'').replace(/"/g,'').trim();
+      }
+    });
+    const ts=lastRun?'Stats as of: '+lastRun:'Stats as of: last 5am pull';
     ['lb-status','stats-status','gl-status'].forEach(id=>document.getElementById(id).textContent=ts);
+    document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
     loadMatchups();
   }catch(e){
     console.error(e);
@@ -498,7 +507,7 @@ function renderBracket(games){
   });
 
   document.getElementById('bracket-section').innerHTML=`
-    <div style="font-size:9px;color:#555;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — CONF. SEMIS</div>
+    <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — CONF. SEMIS</div>
     <div class="bracket-conf-label" style="color:#4ab3f4">EASTERN CONFERENCE</div>
     <div class="bracket-grid">${eastHTML}</div>
     <div class="bracket-conf-label" style="color:#E63A1E">WESTERN CONFERENCE</div>
@@ -577,7 +586,6 @@ function renderMatchups(games){
             :`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat">PTS</span>`;
           html+=`<div class="tm-player-row">
             <div class="tm-player-left">
-              <div class="tm-player-dot" style="background:${dotColor}${isLive?';box-shadow:0 0 4px '+dotColor:''}"></div>
               <div>
                 <div class="tm-owner-label" style="color:${color}">${owner}</div>
                 <div class="tm-player-name">${p.name}${starHTML}</div>
