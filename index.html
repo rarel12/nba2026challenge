@@ -287,6 +287,7 @@ body{background:#000;min-height:100vh}
 <script>
 const LB_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=622670601&single=true&output=csv';
 const LIVE_URL='https://script.google.com/macros/s/AKfycbzrzCiwalARquMGxKEFgRjeqPuku9GcVy_3K7WCAZLOEoOu0gfUeBxO_82m33pkhaHP/exec';
+const SS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=126492487&single=true&output=csv';
 const ST_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=445896293&single=true&output=csv';
 const PL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=691090051&single=true&output=csv';
 const GL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=100966476&single=true&output=csv';
@@ -433,9 +434,11 @@ async function loadData(){
 
 async function loadMatchups(){
   try{
-    const resp=await fetch(LIVE_URL);
-    const data=await resp.json();
-    renderBracket(data.games||[]);
+    const [liveResp,ssResp]=await Promise.all([fetch(LIVE_URL),fetch(SS_URL)]);
+    const data=await liveResp.json();
+    const ssText=await ssResp.text();
+    const ssRows=parseCSV(ssText).filter(r=>r['Conf']);
+    renderBracket(data.games||[],ssRows);
     renderMatchups(data.games||[]);
     document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
   }catch(e){
@@ -446,8 +449,8 @@ async function loadMatchups(){
   matchupsInterval=setInterval(loadMatchups,60000);
 }
 
-function renderBracket(games){
-  // Build series map from live game data
+function renderBracket(games,ssRows){
+  // Build live seriesText map from today's games
   const seriesMap={};
   games.forEach(g=>{
     if(g.seriesText&&g.seriesText.length>0){
@@ -456,58 +459,68 @@ function renderBracket(games){
     }
   });
 
-  // Static series data — update seed/team as rounds progress
-  const SERIES=[
-    {conf:'EAST',seed1:1,team1:'DET',seed2:4,team2:'CLE',next:'GM 2 · MAY 7'},
-    {conf:'EAST',seed1:3,team1:'NYK',seed2:7,team2:'PHI',next:'GM 2 · MAY 6'},
-    {conf:'WEST',seed1:1,team1:'OKC',seed2:4,team2:'LAL',next:'GM 2 · MAY 7'},
-    {conf:'WEST',seed1:2,team1:'MIN',seed2:6,team2:'SAS',next:'GM 2 · MAY 6'},
-  ];
-
-  const parseWins=(text,team)=>{
-    if(!text)return{w1:0,w2:0};
-    const leadsMatch=text.match(/(\w+)\s+leads\s+series\s+(\d+)-(\d+)/i);
-    if(leadsMatch){
-      const leader=leadsMatch[1].toUpperCase();
-      const w=parseInt(leadsMatch[2]);
-      const l=parseInt(leadsMatch[3]);
-      return leader===team.toUpperCase()?{w1:w,w2:l}:{w1:l,w2:w};
+  const parseWins=(text,team1)=>{
+    if(!text)return null;
+    const m=text.match(/([A-Z]+)\s+leads\s+series\s+(\d+)-(\d+)/i);
+    if(m){
+      const leader=m[1].toUpperCase();
+      const w=parseInt(m[2]);const l=parseInt(m[3]);
+      return leader===team1.toUpperCase()?{w1:w,w2:l}:{w1:l,w2:w};
     }
-    return{w1:0,w2:0};
+    return null;
   };
 
+  if(!ssRows||!ssRows.length){
+    document.getElementById('bracket-section').innerHTML='';
+    return;
+  }
+
   let eastHTML='';let westHTML='';
-  SERIES.forEach(s=>{
-    const key=s.team1+'_'+s.team2;
-    const seriesText=seriesMap[key]||'';
-    const wins=parseWins(seriesText,s.team1);
-    const t1Leads=wins.w1>wins.w2;
-    const t2Leads=wins.w2>wins.w1;
-    const isEast=s.conf==='EAST';
+  ssRows.forEach(s=>{
+    const conf=(s['Conf']||'').toUpperCase();
+    const seed1=s['Seed1']||'';
+    const team1=(s['Team1']||'').toUpperCase();
+    const seed2=s['Seed2']||'';
+    const team2=(s['Team2']||'').toUpperCase();
+    let w1=parseInt(s['W1'])||0;
+    let w2=parseInt(s['W2'])||0;
+
+    // Override with live ESPN data if available
+    const liveKey=team1+'_'+team2;
+    const liveText=seriesMap[liveKey]||'';
+    if(liveText){
+      const live=parseWins(liveText,team1);
+      if(live)({w1,w2}=live);
+    }
+
+    const t1Leads=w1>w2;
+    const t2Leads=w2>w1;
+    const isEast=conf==='EAST';
     const bg=isEast?'rgba(30,100,220,0.12)':'rgba(220,50,30,0.12)';
     const border=isEast?'rgba(30,100,220,0.5)':'rgba(220,50,30,0.5)';
+
     const card=`<div class="bracket-card" style="background:${bg};border:1px solid ${border}">
       <div class="bracket-team-row">
         <div class="bracket-team-left">
-          <span class="bracket-seed">${s.seed1}</span>
-          <span class="bracket-team" style="color:${t1Leads?'#FFC72C':'#fff'}">${s.team1}</span>
+          <span class="bracket-seed">${seed1}</span>
+          <span class="bracket-team" style="color:${t1Leads?'#FFC72C':'#fff'}">${team1}</span>
         </div>
-        <span class="bracket-wins" style="color:${t1Leads?'#FFC72C':'#fff'}">${wins.w1}</span>
+        <span class="bracket-wins" style="color:${t1Leads?'#FFC72C':'#fff'}">${w1}</span>
       </div>
       <div class="bracket-team-row">
         <div class="bracket-team-left">
-          <span class="bracket-seed">${s.seed2}</span>
-          <span class="bracket-team" style="color:${t2Leads?'#FFC72C':'#555'}">${s.team2}</span>
+          <span class="bracket-seed">${seed2}</span>
+          <span class="bracket-team" style="color:${t2Leads?'#FFC72C':'#555'}">${team2}</span>
         </div>
-        <span class="bracket-wins" style="color:${t2Leads?'#FFC72C':'#555'}">${wins.w2}</span>
+        <span class="bracket-wins" style="color:${t2Leads?'#FFC72C':'#555'}">${w2}</span>
       </div>
-      <div class="bracket-next">${s.next}</div>
     </div>`;
     if(isEast)eastHTML+=card;else westHTML+=card;
   });
 
+  const roundLabel=document.getElementById('round-pill').textContent||'CONF. SEMIS';
   document.getElementById('bracket-section').innerHTML=`
-    <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — CONF. SEMIS</div>
+    <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — ${roundLabel}</div>
     <div class="bracket-conf-label" style="color:#4ab3f4">EASTERN CONFERENCE</div>
     <div class="bracket-grid">${eastHTML}</div>
     <div class="bracket-conf-label" style="color:#E63A1E">WESTERN CONFERENCE</div>
