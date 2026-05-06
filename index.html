@@ -250,7 +250,6 @@ body{background:#000;min-height:100vh}
   <div id="leaderboard" class="section active">
     <div class="status-bar">
       <div class="status-text" id="lb-status">Loading live data...</div>
-      <div class="status-live">LIVE</div>
     </div>
     <div class="lb-card">
       <div class="lb-header">
@@ -271,14 +270,12 @@ body{background:#000;min-height:100vh}
   <div id="stats" class="section">
     <div class="status-bar">
       <div class="status-text" id="stats-status">Loading stats...</div>
-      <div class="status-live">LIVE</div>
     </div>
     <div id="stats-rows"></div>
   </div>
   <div id="gamelog" class="section">
     <div class="status-bar">
       <div class="status-text" id="gl-status">Loading game log...</div>
-      <div class="status-live">LIVE</div>
     </div>
     <div id="gl-rows"></div>
   </div>
@@ -499,20 +496,22 @@ function renderBracket(games,ssRows){
     const bg=isEast?'rgba(30,100,220,0.12)':'rgba(220,50,30,0.12)';
     const border=isEast?'rgba(30,100,220,0.5)':'rgba(220,50,30,0.5)';
 
+    const t1Color=t1Leads?'#FFC72C':t2Leads?'#555':'#fff';
+    const t2Color=t2Leads?'#FFC72C':t1Leads?'#555':'#fff';
     const card=`<div class="bracket-card" style="background:${bg};border:1px solid ${border}">
       <div class="bracket-team-row">
         <div class="bracket-team-left">
           <span class="bracket-seed">${seed1}</span>
-          <span class="bracket-team" style="color:${t1Leads?'#FFC72C':'#fff'}">${team1}</span>
+          <span class="bracket-team" style="color:${t1Color}">${team1}</span>
         </div>
-        <span class="bracket-wins" style="color:${t1Leads?'#FFC72C':'#fff'}">${w1}</span>
+        <span class="bracket-wins" style="color:${t1Color}">${w1}</span>
       </div>
       <div class="bracket-team-row">
         <div class="bracket-team-left">
           <span class="bracket-seed">${seed2}</span>
-          <span class="bracket-team" style="color:${t2Leads?'#FFC72C':'#555'}">${team2}</span>
+          <span class="bracket-team" style="color:${t2Color}">${team2}</span>
         </div>
-        <span class="bracket-wins" style="color:${t2Leads?'#FFC72C':'#555'}">${w2}</span>
+        <span class="bracket-wins" style="color:${t2Color}">${w2}</span>
       </div>
     </div>`;
     if(isEast)eastHTML+=card;else westHTML+=card;
