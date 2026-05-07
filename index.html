@@ -520,6 +520,8 @@ function renderBracket(games,ssRows){
     const team2=(s['Team2']||'').toUpperCase();
     let w1=parseInt(s['W1'])||0;
     let w2=parseInt(s['W2'])||0;
+    // Debug - log what we're reading
+    console.log(s['Team1'],'W1:',s['W1'],'->',w1,' | ',s['Team2'],'W2:',s['W2'],'->',w2);
 
     // Override with live ESPN data if available
     const liveKey=team1+'_'+team2;
