@@ -526,8 +526,9 @@ function renderBracket(games,ssRows){
     const bg=isEast?'rgba(30,100,220,0.12)':'rgba(220,50,30,0.12)';
     const border=isEast?'rgba(30,100,220,0.5)':'rgba(220,50,30,0.5)';
 
-    const t1Color=t1Leads?'#FFC72C':t2Leads?'#555':'#fff';
-    const t2Color=t2Leads?'#FFC72C':t1Leads?'#555':'#fff';
+    const tied=w1===w2;
+    const t1Color=t1Leads?'#FFC72C':tied?'#fff':'#555';
+    const t2Color=t2Leads?'#FFC72C':tied?'#fff':'#555';
     const card=`<div class="bracket-card" style="background:${bg};border:1px solid ${border}">
       <div class="bracket-team-row">
         <div class="bracket-team-left">
@@ -871,6 +872,28 @@ function renderGameLog(data){
   });
   document.getElementById('gl-rows').innerHTML=html;
 }
+
+// Pull to refresh and visibility refresh for Today tab
+let touchStartY=0;
+document.addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const diff=e.changedTouches[0].clientY-touchStartY;
+  const tmSection=document.getElementById('matchups');
+  if(diff>80&&tmSection&&tmSection.classList.contains('active')){
+    document.getElementById('tm-status').textContent='Refreshing...';
+    loadMatchups();
+  }
+},{passive:true});
+
+// Refresh Today tab when app becomes visible again
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){
+    const tmSection=document.getElementById('matchups');
+    if(tmSection&&tmSection.classList.contains('active')){
+      loadMatchups();
+    }
+  }
+});
 
 function togglePlayer(id,btn){
   const d=document.getElementById(id);const open=d.classList.contains('open');
