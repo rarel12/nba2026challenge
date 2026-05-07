@@ -124,7 +124,9 @@ body{background:#000;min-height:100vh}
 .gl-bonus-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;color:#FFC72C}
 .gl-bonus-pts{font-family:'Courier New',monospace;font-size:15px;font-weight:900;color:#FFC72C}
 /* BRACKET */
-.bracket-section{margin-top:20px}
+@keyframes bracketFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.bracket-section{margin-top:20px;opacity:0}
+.bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
 .bracket-conf-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;opacity:1}
 .bracket-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .bracket-card{border-radius:6px;padding:10px 12px}
@@ -164,9 +166,9 @@ body{background:#000;min-height:100vh}
 .tm-series{font-size:9px;color:#444;letter-spacing:1px;font-family:'Courier New',monospace;padding:5px 14px;background:#0d0d0d;border-bottom:1px solid #1a1a1a}
 .tm-empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px}
 .tm-empty-text{font-size:11px;color:#333;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
-.tab-footer{display:flex;flex-direction:column;align-items:center;padding:28px 20px 20px;gap:8px;border-top:1px solid #111;margin-top:8px}
-.tab-footer img{width:64px;height:64px;object-fit:contain;opacity:0.25}
-.tab-footer-text{font-size:8px;color:#333;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace}
+.tab-footer{display:flex;flex-direction:column;align-items:center;padding:28px 20px 20px;border-top:1px solid #111;margin-top:8px;gap:4px}
+.tab-footer img{width:64px;height:64px;object-fit:contain}
+.tab-footer-text{font-size:8px;color:#555;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace}
 </style>
 </head>
 <body>
@@ -569,12 +571,14 @@ function renderBracket(games,ssRows){
   });
 
   const roundLabel=document.getElementById('round-pill').textContent||'CONF. SEMIS';
-  document.getElementById('bracket-section').innerHTML=`
+  const el=document.getElementById('bracket-section');
+  el.innerHTML=`
     <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — ${roundLabel}</div>
     <div class="bracket-conf-label" style="color:#4ab3f4">EASTERN CONFERENCE</div>
     <div class="bracket-grid">${eastHTML}</div>
     <div class="bracket-conf-label" style="color:#E63A1E">WESTERN CONFERENCE</div>
     <div class="bracket-grid">${westHTML}</div>`;
+  setTimeout(()=>el.classList.add('visible'),600);
 }
 
 function renderMatchups(games){
