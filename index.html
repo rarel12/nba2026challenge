@@ -403,7 +403,11 @@ function startApp(){
 
 async function loadData(){
   try{
-    const [lbR,glR,rtR,plR,stR]=await Promise.all([fetch(LB_URL),fetch(GL_URL),fetch(RT_URL),fetch(PL_URL),fetch(ST_URL)]);
+    const t=Date.now();
+    const [lbR,glR,rtR,plR,stR]=await Promise.all([
+      fetch(LB_URL+'&t='+t),fetch(GL_URL+'&t='+t),
+      fetch(RT_URL+'&t='+t),fetch(PL_URL+'&t='+t),fetch(ST_URL+'&t='+t)
+    ]);
     const [lbT,glT,rtT,plT,stT]=await Promise.all([lbR.text(),glR.text(),rtR.text(),plR.text(),stR.text()]);
     // Pull current round from Settings tab
     const stLines=stT.trim().split('\n');
@@ -461,7 +465,11 @@ async function loadData(){
 
 async function loadMatchups(){
   try{
-    const [liveResp,ssResp]=await Promise.all([fetch(LIVE_URL),fetch(SS_URL)]);
+    const [liveResp,ssResp]=await Promise.all([
+      fetch(LIVE_URL+'?t='+Date.now()),
+      fetch(SS_URL+'&t='+Date.now())
+    ]);
+    if(!liveResp.ok||!ssResp.ok)throw new Error('Fetch failed');
     const data=await liveResp.json();
     const ssText=await ssResp.text();
     const ssRows=parseCSV(ssText).filter(r=>r['Conf']);
@@ -470,7 +478,7 @@ async function loadMatchups(){
     document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
   }catch(e){
     console.error('Matchups error:',e);
-    document.getElementById('tm-status').textContent='Error loading matchups';
+    document.getElementById('tm-status').textContent='Error — pull down to retry';
   }
   if(matchupsInterval)clearInterval(matchupsInterval);
   matchupsInterval=setInterval(loadMatchups,60000);
@@ -480,7 +488,8 @@ function renderBracket(games,ssRows){
   // Build live seriesText map from today's games
   const seriesMap={};
   games.forEach(g=>{
-    if(g.seriesText&&g.seriesText.length>0){
+    // Only use live seriesText during active games — not completed ones
+    if(g.statusState==='in'&&g.seriesText&&g.seriesText.length>0){
       seriesMap[g.homeTeam+'_'+g.awayTeam]=g.seriesText;
       seriesMap[g.awayTeam+'_'+g.homeTeam]=g.seriesText;
     }
