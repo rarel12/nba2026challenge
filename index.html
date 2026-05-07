@@ -164,6 +164,9 @@ body{background:#000;min-height:100vh}
 .tm-series{font-size:9px;color:#444;letter-spacing:1px;font-family:'Courier New',monospace;padding:5px 14px;background:#0d0d0d;border-bottom:1px solid #1a1a1a}
 .tm-empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px}
 .tm-empty-text{font-size:11px;color:#333;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
+.tab-footer{display:flex;flex-direction:column;align-items:center;padding:28px 20px 20px;gap:8px;border-top:1px solid #111;margin-top:8px}
+.tab-footer img{width:64px;height:64px;object-fit:contain;opacity:0.25}
+.tab-footer-text{font-size:8px;color:#333;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace}
 </style>
 </head>
 <body>
@@ -259,6 +262,10 @@ body{background:#000;min-height:100vh}
       <div id="lb-rows"></div>
     </div>
     <div class="bracket-section" id="bracket-section"></div>
+    <div class="tab-footer">
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
+      <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
+    </div>
   </div>
   <div id="matchups" class="section">
     <div class="status-bar">
@@ -272,12 +279,20 @@ body{background:#000;min-height:100vh}
       <div class="status-text" id="stats-status">Loading stats...</div>
     </div>
     <div id="stats-rows"></div>
+    <div class="tab-footer">
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
+      <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
+    </div>
   </div>
   <div id="gamelog" class="section">
     <div class="status-bar">
       <div class="status-text" id="gl-status">Loading game log...</div>
     </div>
     <div id="gl-rows"></div>
+    <div class="tab-footer">
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
+      <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
+    </div>
   </div>
 </div>
 
@@ -574,8 +589,8 @@ function renderMatchups(games){
     const allFinal=games.every(g=>g.statusState==='post');
     if(!hasTodayGames||allFinal){
       document.getElementById('tm-rows').innerHTML=`<div class="tm-empty">
-        <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:120px;height:120px;object-fit:contain"/>
-        <div class="tm-empty-text">Games tip off tonight<br>Check back closer to tip</div>
+        <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:200px;height:200px;object-fit:contain"/>
+        <div class="tm-empty-text">No Games Today</div>
       </div>`;
       return;
     }
@@ -583,8 +598,8 @@ function renderMatchups(games){
   
   if(!games.length){
     document.getElementById('tm-rows').innerHTML=`<div class="tm-empty">
-      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:120px;height:120px;object-fit:contain"/>
-      <div class="tm-empty-text">No tracked players<br>in action today</div>
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:200px;height:200px;object-fit:contain"/>
+      <div class="tm-empty-text">No Games Today</div>
     </div>`;
     return;
   }
@@ -650,6 +665,8 @@ function renderMatchups(games){
         const color=OWNER_COLORS[owner]||'#888';
         players.forEach(p=>{
           const starHTML=p.star?`<span class="tm-player-star">★</span>`:'';
+          const isInjuredTM=(playerStatus[p.name]||'').trim()==='Injured';
+          const injuryHTML=isInjuredTM?`<span class="injury-ico" style="margin-left:3px">🩹</span>`:'';
           const statsHTML=p.star
             ?`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat">PTS</span>
               <span class="tm-stat-val">${p.reb}</span><span class="tm-stat">REB</span>
@@ -659,7 +676,7 @@ function renderMatchups(games){
             <div class="tm-player-left">
               <div>
                 <div class="tm-owner-label" style="color:${color}">${owner}</div>
-                <div class="tm-player-name">${p.name}${starHTML}</div>
+                <div class="tm-player-name">${p.name}${starHTML}${injuryHTML}</div>
               </div>
             </div>
             <div class="tm-player-stats">
@@ -676,7 +693,10 @@ function renderMatchups(games){
     html+='</div>';
   });
 
-  document.getElementById('tm-rows').innerHTML=html;
+  document.getElementById('tm-rows').innerHTML=html+`<div class="tab-footer">
+    <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
+    <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
+  </div>`;
 }
 
 function renderLeaderboard(rows){
