@@ -723,13 +723,10 @@ function renderLeaderboard(rows){
     return;
   }
   const max=sorted[0][1]||1;
-  const min=sorted[sorted.length-1][1]||0;
-  const spread=Math.max(max-min,1);
-  const BAR_MIN=40; // leader always 100%, last place gets BAR_MIN%
   document.getElementById('lb-rows').innerHTML=sorted.map(([owner,score],i)=>{
     const color=OWNER_COLORS[owner]||'#888';
     const behind=i===0?'LEADER':'-'+Math.round(max-score)+' PTS';
-    const pct=i===0?100:Math.round(BAR_MIN+((score-min)/spread)*(100-BAR_MIN));
+    const pct=(score/max*100).toFixed(1);
     return `<div class="lb-row">
       <div class="lb-rank" style="color:${MEDALS[i]}">${MEDAL_LABELS[i]}</div>
       <div class="lb-info">
