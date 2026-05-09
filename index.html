@@ -167,7 +167,7 @@ body{background:#000;min-height:100vh}
 .tm-empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px}
 .tm-empty-text{font-size:11px;color:#333;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
 .tab-footer{display:flex;flex-direction:column;align-items:center;padding:28px 20px 20px;border-top:1px solid #111;margin-top:8px;gap:4px}
-.tab-footer img{width:64px;height:64px;object-fit:contain}
+.tab-footer img{width:64px;height:64px;object-fit:contain;mix-blend-mode:screen}
 .tab-footer-text{font-size:8px;color:#555;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace}
 </style>
 </head>
@@ -491,8 +491,32 @@ async function loadMatchups(){
     const ssText=await ssResp.text();
     const ssRows=parseCSV(ssText).filter(r=>r['Conf']);
     renderBracket(data.games||[],ssRows);
-    renderMatchups(data.games||[]);
-    document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
+
+    const todayKey='cachedGames_'+new Date().toLocaleDateString('en-CA',{timeZone:'America/Chicago'});
+    const hourCT=parseInt(new Intl.DateTimeFormat('en-US',{hour:'numeric',hour12:false,timeZone:'America/Chicago'}).format(new Date()));
+
+    // Clear stale cache from previous day at 5am CT
+    if(hourCT>=5){
+      Object.keys(localStorage).filter(k=>k.startsWith('cachedGames_')&&k!==todayKey).forEach(k=>localStorage.removeItem(k));
+    }
+
+    if(data.games&&data.games.length>0){
+      // Fresh data from ESPN — cache it and render
+      localStorage.setItem(todayKey,JSON.stringify(data.games));
+      renderMatchups(data.games);
+    } else {
+      // ESPN returned nothing — use today's cache if before 5am
+      const cached=localStorage.getItem(todayKey);
+      if(cached&&hourCT<5){
+        renderMatchups(JSON.parse(cached));
+        document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString()+' (cached)';
+      } else {
+        renderMatchups([]);
+      }
+    }
+    if(data.games&&data.games.length>0){
+      document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
+    }
   }catch(e){
     console.error('Matchups error:',e);
     document.getElementById('tm-status').textContent='Error — pull down to retry';
@@ -582,27 +606,11 @@ function renderBracket(games,ssRows){
 }
 
 function renderMatchups(games){
-  // Check if all games are completed from a previous day
-  const today=new Date();
-  const todayStr=today.toISOString().substring(0,10);
-  const hasActiveGames=games.some(g=>g.statusState==='in'||g.statusState==='pre');
   const hasTodayGames=games.length>0;
-  
-  if(!hasTodayGames||(!hasActiveGames&&games.every(g=>g.statusState==='post'))){
-    // Check ESPN for upcoming games — if none show empty state
-    const allFinal=games.every(g=>g.statusState==='post');
-    if(!hasTodayGames||allFinal){
-      document.getElementById('tm-rows').innerHTML=`<div class="tm-empty">
-        <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:200px;height:200px;object-fit:contain"/>
-        <div class="tm-empty-text">No Games Today</div>
-      </div>`;
-      return;
-    }
-  }
-  
-  if(!games.length){
+
+  if(!hasTodayGames){
     document.getElementById('tm-rows').innerHTML=`<div class="tm-empty">
-      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:200px;height:200px;object-fit:contain"/>
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt="" style="width:200px;height:200px;object-fit:contain;mix-blend-mode:screen"/>
       <div class="tm-empty-text">No Games Today</div>
     </div>`;
     return;
@@ -715,10 +723,13 @@ function renderLeaderboard(rows){
     return;
   }
   const max=sorted[0][1]||1;
+  const min=sorted[sorted.length-1][1]||0;
+  const spread=Math.max(max-min,1);
+  const BAR_MIN=40; // leader always 100%, last place gets BAR_MIN%
   document.getElementById('lb-rows').innerHTML=sorted.map(([owner,score],i)=>{
     const color=OWNER_COLORS[owner]||'#888';
     const behind=i===0?'LEADER':'-'+Math.round(max-score)+' PTS';
-    const pct=Math.round((score/max)*100);
+    const pct=i===0?100:Math.round(BAR_MIN+((score-min)/spread)*(100-BAR_MIN));
     return `<div class="lb-row">
       <div class="lb-rank" style="color:${MEDALS[i]}">${MEDAL_LABELS[i]}</div>
       <div class="lb-info">
