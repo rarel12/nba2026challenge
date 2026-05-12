@@ -578,23 +578,37 @@ function renderBracket(games,ssRows){
     const border=isEast?'rgba(30,100,220,0.5)':'rgba(220,50,30,0.5)';
 
     const tied=w1===w2;
-    const t1Color=t1Leads?'#FFC72C':tied?'#fff':'#555';
-    const t2Color=t2Leads?'#FFC72C':tied?'#fff':'#555';
-    const card=`<div class="bracket-card" style="background:${bg};border:1px solid ${border}">
-      <div class="bracket-team-row">
+    const clinched1=w1>=4;
+    const clinched2=w2>=4;
+    const clinched=clinched1||clinched2;
+    const winner=clinched1?team1:clinched2?team2:null;
+
+    const t1Color=clinched1?'#FFC72C':clinched2?'#444':t1Leads?'#FFC72C':tied?'#fff':'#555';
+    const t2Color=clinched2?'#FFC72C':clinched1?'#444':t2Leads?'#FFC72C':tied?'#fff':'#555';
+    const cardBg=clinched?'#0d1a2e':bg;
+    const cardBorder=clinched?'#b8860b':border;
+
+    const logoAbbr=winner?winner.toLowerCase():'';
+    const logoHTML=winner?`<img src="https://a.espncdn.com/i/teamlogos/nba/500/${logoAbbr}.png" alt="" style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:72px;height:72px;object-fit:contain;opacity:0.15;pointer-events:none;mix-blend-mode:screen"/>`:'';
+    const clinchedBadge=clinched?`<div style="font-size:6px;letter-spacing:1px;color:#FFD700;margin-top:3px;position:relative;z-index:1">● SERIES CLINCHED</div>`:'';
+
+    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder};position:relative;overflow:hidden">
+      ${logoHTML}
+      <div class="bracket-team-row" style="position:relative;z-index:1;opacity:${clinched2?0.35:1}">
         <div class="bracket-team-left">
           <span class="bracket-seed">${seed1}</span>
           <span class="bracket-team" style="color:${t1Color}">${team1}</span>
         </div>
         <span class="bracket-wins" style="color:${t1Color}">${w1}</span>
       </div>
-      <div class="bracket-team-row">
+      <div class="bracket-team-row" style="position:relative;z-index:1;opacity:${clinched1?0.35:1}">
         <div class="bracket-team-left">
           <span class="bracket-seed">${seed2}</span>
           <span class="bracket-team" style="color:${t2Color}">${team2}</span>
         </div>
         <span class="bracket-wins" style="color:${t2Color}">${w2}</span>
       </div>
+      ${clinchedBadge}
     </div>`;
     if(isEast)eastHTML+=card;else westHTML+=card;
   });
