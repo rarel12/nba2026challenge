@@ -492,30 +492,35 @@ async function loadMatchups(){
     const ssRows=parseCSV(ssText).filter(r=>r['Conf']);
     renderBracket(data.games||[],ssRows);
 
-    const todayKey='cachedGames_'+new Date().toLocaleDateString('en-CA',{timeZone:'America/Chicago'});
-    const hourCT=parseInt(new Intl.DateTimeFormat('en-US',{hour:'numeric',hour12:false,timeZone:'America/Chicago'}).format(new Date()));
+    const nowCT=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'}));
+    const hourCT=nowCT.getHours();
+    const todayKey='cachedGames_'+nowCT.toLocaleDateString('en-CA');
+    const yesterday=new Date(nowCT);yesterday.setDate(yesterday.getDate()-1);
+    const yesterdayKey='cachedGames_'+yesterday.toLocaleDateString('en-CA');
 
-    // Clear stale cache from previous day at 5am CT
+    // At 5am CT clear yesterday's cache — keep only today's key
     if(hourCT>=5){
       Object.keys(localStorage).filter(k=>k.startsWith('cachedGames_')&&k!==todayKey).forEach(k=>localStorage.removeItem(k));
     }
 
     if(data.games&&data.games.length>0){
-      // Fresh data from ESPN — cache it and render
+      // Fresh data from ESPN — cache under today's key and render
       localStorage.setItem(todayKey,JSON.stringify(data.games));
       renderMatchups(data.games);
+      document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
     } else {
-      // ESPN returned nothing — use today's cache if before 5am
-      const cached=localStorage.getItem(todayKey);
-      if(cached&&hourCT<5){
-        renderMatchups(JSON.parse(cached));
-        document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString()+' (cached)';
+      // ESPN returned nothing — before 5am check today's cache first, then yesterday's
+      if(hourCT<5){
+        const cached=localStorage.getItem(todayKey)||localStorage.getItem(yesterdayKey);
+        if(cached){
+          renderMatchups(JSON.parse(cached));
+          document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString()+' (cached)';
+        } else {
+          renderMatchups([]);
+        }
       } else {
         renderMatchups([]);
       }
-    }
-    if(data.games&&data.games.length>0){
-      document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
     }
   }catch(e){
     console.error('Matchups error:',e);
