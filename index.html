@@ -33,10 +33,12 @@ body{background:#000;min-height:100vh}
 .app-bar{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:hidden;border-bottom:4px solid #8A6200}
 .app-bar-planks{position:absolute;inset:0;display:flex;flex-direction:column;z-index:0}
 .ap-row{display:flex;flex:1}
-.ap{height:100%;border-right:1px solid rgba(0,0,0,0.15);border-bottom:1px solid rgba(0,0,0,0.12)}
-.app-bar-shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 55%);pointer-events:none;z-index:1}
-.app-title{font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,0.55);padding:4px 10px;border-radius:3px;position:relative;z-index:2;font-family:'Courier New',monospace}
-.round-pill{font-size:10px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.55);padding:4px 10px;border-radius:3px;border:none;position:relative;z-index:2;font-family:'Courier New',monospace}
+.ap{height:100%;border-right:1px solid rgba(0,0,0,0.25);border-bottom:1px solid rgba(0,0,0,0.2);position:relative}
+.ap::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,0.06) 6px,rgba(0,0,0,0.06) 7px)}
+.app-bar-noise{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.07;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px 128px}
+.app-bar-shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 55%);pointer-events:none;z-index:2}
+.app-title{font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,0.65);padding:4px 10px;border-radius:3px;position:relative;z-index:3;font-family:'Courier New',monospace}
+.round-pill{font-size:10px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.65);padding:4px 10px;border-radius:3px;border:none;position:relative;z-index:3;font-family:'Courier New',monospace}
 .app-bar::after{display:none}
 @media(max-width:420px){
   .app-title{font-size:10px;letter-spacing:0.5px}
@@ -247,12 +249,13 @@ body{background:#000;min-height:100vh}
 <div id="app">
   <div class="app-bar">
     <div class="app-bar-planks" aria-hidden="true">
-      <div class="ap-row"><div class="ap" style="width:22%;background:#C8860A"></div><div class="ap" style="width:35%;background:#D4920E"></div><div class="ap" style="width:18%;background:#B87A08"></div><div class="ap" style="width:25%;background:#C8860A"></div></div>
-      <div class="ap-row"><div class="ap" style="width:12%;background:#D4920E"></div><div class="ap" style="width:28%;background:#C07A06"></div><div class="ap" style="width:32%;background:#DCA010"></div><div class="ap" style="width:28%;background:#B87408"></div></div>
-      <div class="ap-row"><div class="ap" style="width:30%;background:#C8860A"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:30%;background:#B87A08"></div><div class="ap" style="width:20%;background:#DCA010"></div></div>
-      <div class="ap-row"><div class="ap" style="width:18%;background:#C07A06"></div><div class="ap" style="width:35%;background:#C8860A"></div><div class="ap" style="width:22%;background:#D4920E"></div><div class="ap" style="width:25%;background:#B87408"></div></div>
-      <div class="ap-row"><div class="ap" style="width:25%;background:#DCA010"></div><div class="ap" style="width:18%;background:#C8860A"></div><div class="ap" style="width:35%;background:#C07A06"></div><div class="ap" style="width:22%;background:#D4920E"></div></div>
+      <div class="ap-row"><div class="ap" style="width:19%;background:#C8860A"></div><div class="ap" style="width:31%;background:#D4920E"></div><div class="ap" style="width:14%;background:#C07A06"></div><div class="ap" style="width:23%;background:#DCA010"></div><div class="ap" style="width:13%;background:#C8860A"></div></div>
+      <div class="ap-row"><div class="ap" style="width:27%;background:#D4920E"></div><div class="ap" style="width:11%;background:#C8860A"></div><div class="ap" style="width:34%;background:#DCA010"></div><div class="ap" style="width:17%;background:#C07A06"></div><div class="ap" style="width:11%;background:#D4920E"></div></div>
+      <div class="ap-row"><div class="ap" style="width:15%;background:#DCA010"></div><div class="ap" style="width:28%;background:#C07A06"></div><div class="ap" style="width:22%;background:#C8860A"></div><div class="ap" style="width:19%;background:#D4920E"></div><div class="ap" style="width:16%;background:#DCA010"></div></div>
+      <div class="ap-row"><div class="ap" style="width:22%;background:#C07A06"></div><div class="ap" style="width:16%;background:#D4920E"></div><div class="ap" style="width:29%;background:#C8860A"></div><div class="ap" style="width:13%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C07A06"></div></div>
+      <div class="ap-row"><div class="ap" style="width:33%;background:#D4920E"></div><div class="ap" style="width:15%;background:#DCA010"></div><div class="ap" style="width:21%;background:#C8860A"></div><div class="ap" style="width:18%;background:#D4920E"></div><div class="ap" style="width:13%;background:#C07A06"></div></div>
     </div>
+    <div class="app-bar-noise" aria-hidden="true"></div>
     <div class="app-bar-shine" aria-hidden="true"></div>
     <div class="app-title">NBA Playoff Challenge 2026</div>
     <div class="round-pill" id="round-pill">1ST ROUND</div>
@@ -351,6 +354,8 @@ const OWNER_COLORS={'KMART':'#4ab3f4','The Fanchise':'#63c754','Mr. HUSTLE':'#E6
 const OWNER_ORDER=['KMART','The Fanchise','Mr. HUSTLE','AIR-EL'];
 const MEDALS=['#FFD700','#C0C0C0','#CD7F32','#666'];
 const MEDAL_LABELS=['1ST','2ND','3RD','4TH'];
+const MEDAL_SHADOWS=['#8A6200','#333','#5a3000','#000'];
+const OWNER_SHADOWS={'KMART':'#003366','The Fanchise':'#1a4d10','Mr. HUSTLE':'#6b1000','AIR-EL':'#3d1a6e'};
 let glData=[];
 let playerStatus={};
 let playerStar={};
@@ -628,16 +633,16 @@ function renderBracket(games,ssRows){
       <div class="bracket-team-row" style="position:relative;z-index:1;opacity:${clinched2?0.35:1}">
         <div class="bracket-team-left">
           <span class="bracket-seed">${seed1}</span>
-          <span class="bracket-team" style="color:${t1Color}">${team1}</span>
+          <span class="bracket-team" style="color:${t1Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${team1}</span>
         </div>
-        <span class="bracket-wins" style="color:${t1Color}">${w1}</span>
+        <span class="bracket-wins" style="color:${t1Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${w1}</span>
       </div>
       <div class="bracket-team-row" style="position:relative;z-index:1;opacity:${clinched1?0.35:1}">
         <div class="bracket-team-left">
           <span class="bracket-seed">${seed2}</span>
-          <span class="bracket-team" style="color:${t2Color}">${team2}</span>
+          <span class="bracket-team" style="color:${t2Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${team2}</span>
         </div>
-        <span class="bracket-wins" style="color:${t2Color}">${w2}</span>
+        <span class="bracket-wins" style="color:${t2Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${w2}</span>
       </div>
       ${clinchedBadge}
     </div>`;
@@ -775,17 +780,18 @@ function renderLeaderboard(rows){
   const max=sorted[0][1]||1;
   document.getElementById('lb-rows').innerHTML=sorted.map(([owner,score],i)=>{
     const color=OWNER_COLORS[owner]||'#888';
+    const shadow=OWNER_SHADOWS[owner]||'#000';
     const behind=i===0?'LEADER':'-'+Math.round(max-score)+' PTS';
     const pct=(score/max*100).toFixed(1);
     return `<div class="lb-row">
-      <div class="lb-rank" style="color:${MEDALS[i]}">${MEDAL_LABELS[i]}</div>
+      <div class="lb-rank" style="color:${MEDALS[i]};text-shadow:2px 2px 0 ${MEDAL_SHADOWS[i]}">${MEDAL_LABELS[i]}</div>
       <div class="lb-info">
-        <div class="lb-name" style="color:${color}">${owner}</div>
+        <div class="lb-name" style="color:${color};text-shadow:2px 2px 0 ${shadow}">${owner}</div>
         <div class="lb-sub">${behind}</div>
         <div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
       </div>
       <div class="lb-right">
-        <div class="lb-score" style="color:${color};text-shadow:0 0 10px ${color}88">${Math.round(score)}</div>
+        <div class="lb-score" style="color:${color};text-shadow:2px 2px 0 ${shadow},0 0 10px ${color}88">${Math.round(score)}</div>
         <div class="lb-behind">pts</div>
       </div>
     </div>`;
