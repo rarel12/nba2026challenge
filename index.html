@@ -480,6 +480,8 @@ async function loadData(){
   }
 }
 
+let lastGoodGames=null; // in-memory cache — survives localStorage purges
+
 async function loadMatchups(){
   try{
     const [liveResp,ssResp]=await Promise.all([
@@ -498,22 +500,32 @@ async function loadMatchups(){
     const yesterday=new Date(nowCT);yesterday.setDate(yesterday.getDate()-1);
     const yesterdayKey='cachedGames_'+yesterday.toLocaleDateString('en-CA');
 
-    // At 5am CT clear yesterday's cache — keep only today's key
+    // At 5am CT clear stale cache and in-memory store
     if(hourCT>=5){
       Object.keys(localStorage).filter(k=>k.startsWith('cachedGames_')&&k!==todayKey).forEach(k=>localStorage.removeItem(k));
+      // Only clear in-memory if it's from a previous day
+      if(lastGoodGames&&lastGoodGames.date!==todayKey) lastGoodGames=null;
     }
 
     if(data.games&&data.games.length>0){
-      // Fresh data from ESPN — cache under today's key and render
-      localStorage.setItem(todayKey,JSON.stringify(data.games));
+      // Fresh ESPN data — update both caches
+      lastGoodGames={games:data.games,date:todayKey};
+      try{localStorage.setItem(todayKey,JSON.stringify(data.games));}catch(e){}
       renderMatchups(data.games);
       document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
     } else {
-      // ESPN returned nothing — before 5am check today's cache first, then yesterday's
+      // ESPN empty — try in-memory first, then localStorage, before 5am only
       if(hourCT<5){
-        const cached=localStorage.getItem(todayKey)||localStorage.getItem(yesterdayKey);
+        let cached=null;
+        if(lastGoodGames) cached=lastGoodGames.games;
+        if(!cached){
+          try{
+            const raw=localStorage.getItem(todayKey)||localStorage.getItem(yesterdayKey);
+            if(raw) cached=JSON.parse(raw);
+          }catch(e){}
+        }
         if(cached){
-          renderMatchups(JSON.parse(cached));
+          renderMatchups(cached);
           document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString()+' (cached)';
         } else {
           renderMatchups([]);
@@ -523,8 +535,16 @@ async function loadMatchups(){
       }
     }
   }catch(e){
-    console.error('Matchups error:',e);
-    document.getElementById('tm-status').textContent='Error — pull down to retry';
+    // On fetch error, show in-memory cache if available
+    const nowCT=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'}));
+    const hourCT=nowCT.getHours();
+    if(lastGoodGames&&hourCT<5){
+      renderMatchups(lastGoodGames.games);
+      document.getElementById('tm-status').textContent='Error — showing cached data';
+    } else {
+      console.error('Matchups error:',e);
+      document.getElementById('tm-status').textContent='Error — pull down to retry';
+    }
   }
   if(matchupsInterval)clearInterval(matchupsInterval);
   matchupsInterval=setInterval(loadMatchups,60000);
