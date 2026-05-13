@@ -10,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#000;min-height:100vh}
 #intro{background:#000;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',monospace;position:relative;overflow:hidden}
-#app{display:none;font-family:'Arial',sans-serif;background:#0a0a0a;min-height:100vh}
+#app{display:none;font-family:'Courier New',monospace;background:#000;min-height:100vh}
 .scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:5}
 .pixel-border{display:flex;gap:5px;padding:4px 0}
 .pb{width:12px;height:12px;border-radius:1px}
@@ -30,27 +30,30 @@ body{background:#000;min-height:100vh}
 .trans-img.in{opacity:1}
 .trans-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
 .trans-bar.go{width:100%}
-.app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
-.app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase}
-.round-pill{background:rgba(255,199,44,0.15);color:#FFC72C;font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,199,44,0.3);letter-spacing:1px;white-space:nowrap;flex-shrink:0}
-.app-bar{background:#002B5C;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.app-title{font-size:13px;font-weight:700;color:#FFC72C;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-bar{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:hidden;border-bottom:4px solid #8A6200}
+.app-bar-planks{position:absolute;inset:0;display:flex;flex-direction:column;z-index:0}
+.ap-row{display:flex;flex:1}
+.ap{height:100%;border-right:1px solid rgba(0,0,0,0.15);border-bottom:1px solid rgba(0,0,0,0.12)}
+.app-bar-shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 55%);pointer-events:none;z-index:1}
+.app-title{font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,0.55);padding:4px 10px;border-radius:3px;position:relative;z-index:2;font-family:'Courier New',monospace}
+.round-pill{font-size:10px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.55);padding:4px 10px;border-radius:3px;border:none;position:relative;z-index:2;font-family:'Courier New',monospace}
+.app-bar::after{display:none}
 @media(max-width:420px){
   .app-title{font-size:10px;letter-spacing:0.5px}
   .round-pill{font-size:9px;padding:2px 7px;letter-spacing:0}
   .app-bar{padding:10px 12px}
 }
-.tab-bar{display:flex;background:#001A3D}
-.tab-btn{flex:1;padding:12px;font-size:11px;font-weight:700;color:rgba(255,199,44,0.4);background:none;border:none;cursor:pointer;letter-spacing:2px;text-transform:uppercase;border-bottom:3px solid transparent;font-family:'Arial',sans-serif}
+.tab-bar{display:flex;background:#000;border-top:1px solid #000;border-bottom:1px solid #1a1a1a}
+.tab-btn{flex:1;padding:12px;font-size:11px;font-weight:700;color:rgba(255,199,44,0.4);background:none;border:none;cursor:pointer;letter-spacing:2px;text-transform:uppercase;border-bottom:3px solid transparent;font-family:'Courier New',monospace}
 .tab-btn.active{color:#FFC72C;border-bottom-color:#FFC72C}
-.section{display:none;padding:16px;background:#0a0a0a}
+.section{display:none;padding:16px;background:#000}
 .section.active{display:block}
 .status-bar{background:#111;border:1px solid #222;border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
 .status-text{font-size:10px;color:#555;letter-spacing:1px;text-transform:uppercase;font-family:'Courier New',monospace}
 .status-live{font-size:10px;color:#E63A1E;letter-spacing:2px;font-family:'Courier New',monospace;font-weight:700}
 /* STANDINGS */
 .lb-card{background:#111;border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:10px}
-.lb-header{background:#001A3D;padding:8px 16px;display:flex;align-items:center;justify-content:space-between}
+.lb-header{background:#000;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-left:3px solid #FFC72C;border-bottom:1px solid #1a1a1a}
 .lb-header-text{font-size:9px;color:#FFC72C;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace}
 .lb-row{display:flex;align-items:center;padding:16px;gap:8px;border-bottom:1px solid #1a1a1a}
 .lb-row:last-child{border-bottom:none}
@@ -127,7 +130,7 @@ body{background:#000;min-height:100vh}
 @keyframes bracketFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .bracket-section{margin-top:20px;opacity:0}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
-.bracket-conf-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;opacity:1}
+.bracket-conf-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;opacity:1;padding-bottom:5px;border-bottom:1px solid}
 .bracket-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .bracket-card{border-radius:6px;padding:10px 12px}
 .bracket-team-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
@@ -243,6 +246,14 @@ body{background:#000;min-height:100vh}
 
 <div id="app">
   <div class="app-bar">
+    <div class="app-bar-planks" aria-hidden="true">
+      <div class="ap-row"><div class="ap" style="width:22%;background:#C8860A"></div><div class="ap" style="width:35%;background:#D4920E"></div><div class="ap" style="width:18%;background:#B87A08"></div><div class="ap" style="width:25%;background:#C8860A"></div></div>
+      <div class="ap-row"><div class="ap" style="width:12%;background:#D4920E"></div><div class="ap" style="width:28%;background:#C07A06"></div><div class="ap" style="width:32%;background:#DCA010"></div><div class="ap" style="width:28%;background:#B87408"></div></div>
+      <div class="ap-row"><div class="ap" style="width:30%;background:#C8860A"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:30%;background:#B87A08"></div><div class="ap" style="width:20%;background:#DCA010"></div></div>
+      <div class="ap-row"><div class="ap" style="width:18%;background:#C07A06"></div><div class="ap" style="width:35%;background:#C8860A"></div><div class="ap" style="width:22%;background:#D4920E"></div><div class="ap" style="width:25%;background:#B87408"></div></div>
+      <div class="ap-row"><div class="ap" style="width:25%;background:#DCA010"></div><div class="ap" style="width:18%;background:#C8860A"></div><div class="ap" style="width:35%;background:#C07A06"></div><div class="ap" style="width:22%;background:#D4920E"></div></div>
+    </div>
+    <div class="app-bar-shine" aria-hidden="true"></div>
     <div class="app-title">NBA Playoff Challenge 2026</div>
     <div class="round-pill" id="round-pill">1ST ROUND</div>
   </div>
@@ -774,7 +785,7 @@ function renderLeaderboard(rows){
         <div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
       </div>
       <div class="lb-right">
-        <div class="lb-score" style="color:${color}">${Math.round(score)}</div>
+        <div class="lb-score" style="color:${color};text-shadow:0 0 10px ${color}88">${Math.round(score)}</div>
         <div class="lb-behind">pts</div>
       </div>
     </div>`;
