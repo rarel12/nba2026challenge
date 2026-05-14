@@ -30,16 +30,9 @@ body{background:#000;min-height:100vh}
 .trans-img.in{opacity:1}
 .trans-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
 .trans-bar.go{width:100%}
-.app-bar{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:hidden;border-bottom:4px solid #8A6200}
-.app-bar-planks{position:absolute;inset:0;display:flex;flex-direction:column;z-index:0}
-.ap-row{display:flex;flex:1;overflow:hidden}
-.ap{height:100%;border-right:1px solid rgba(0,0,0,0.25);border-bottom:1px solid rgba(0,0,0,0.2);position:relative}
-.ap::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,0.06) 6px,rgba(0,0,0,0.06) 7px)}
-.app-bar-noise{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.07;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px 128px}
-.app-bar-shine{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 55%);pointer-events:none;z-index:2}
-.app-title{font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,0.65);padding:4px 10px;border-radius:3px;position:relative;z-index:3;font-family:'Courier New',monospace}
-.round-pill{font-size:10px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.65);padding:4px 10px;border-radius:3px;border:none;position:relative;z-index:3;font-family:'Courier New',monospace}
-.app-bar::after{display:none}
+.app-bar{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:hidden;border-top:2px solid #F5C518;border-bottom:4px solid #B87800;background:repeating-linear-gradient(180deg,#F5C518 0px,#F5C518 2px,#E0A010 2px,#E0A010 3px,#F5C518 3px,#F5C518 5px,#E8B010 5px,#E8B010 6px)}
+.app-title{font-size:13px;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(0,0,0,0.65);padding:4px 10px;border-radius:3px;position:relative;z-index:1;font-family:'Courier New',monospace}
+.round-pill{font-size:10px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;flex-shrink:0;background:rgba(0,0,0,0.65);padding:4px 10px;border-radius:3px;border:none;position:relative;z-index:1;font-family:'Courier New',monospace}
 @media(max-width:420px){
   .app-title{font-size:10px;letter-spacing:0.5px}
   .round-pill{font-size:9px;padding:2px 7px;letter-spacing:0}
@@ -248,16 +241,6 @@ body{background:#000;min-height:100vh}
 
 <div id="app">
   <div class="app-bar">
-    <div class="app-bar-planks" aria-hidden="true">
-      <div class="ap-row" style="margin-left:0%"><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#D4920E"></div></div>
-      <div class="ap-row" style="margin-left:-10%"><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#DCA010"></div></div>
-      <div class="ap-row" style="margin-left:-5%"><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#C8860A"></div></div>
-      <div class="ap-row" style="margin-left:-15%"><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#D4920E"></div></div>
-      <div class="ap-row" style="margin-left:-8%"><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#C07A06"></div></div>
-      <div class="ap-row" style="margin-left:-13%"><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C8860A"></div><div class="ap" style="width:20%;background:#D4920E"></div><div class="ap" style="width:20%;background:#C07A06"></div><div class="ap" style="width:20%;background:#DCA010"></div><div class="ap" style="width:20%;background:#C8860A"></div></div>
-    </div>
-    <div class="app-bar-noise" aria-hidden="true"></div>
-    <div class="app-bar-shine" aria-hidden="true"></div>
     <div class="app-title">NBA Playoff Challenge 2026</div>
     <div class="round-pill" id="round-pill">1ST ROUND</div>
   </div>
