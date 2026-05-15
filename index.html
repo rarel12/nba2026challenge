@@ -136,7 +136,7 @@ body{background:#000;min-height:100vh}
 .leader-pts-num{font-size:20px;font-weight:900;font-family:'Courier New',monospace}
 .leader-pts-label{font-size:7px;color:#555;letter-spacing:1px}
 .leader-img{width:110px;flex-shrink:0;position:relative;overflow:hidden;background:#000;display:flex;align-items:flex-end;justify-content:center}
-.leader-img img{height:110px;width:auto;display:block;object-fit:contain;object-position:bottom center}
+.leader-img img{height:90px;width:auto;display:block;object-fit:contain;object-position:bottom center}
 @keyframes bracketFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .bracket-section{margin-top:20px;opacity:0}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
@@ -847,7 +847,7 @@ function renderLeaders(rows){
       :`<div class="leader-img" style="background:rgba(0,0,0,0.2)"></div>`;
     const cardBorder=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#333';
     const rankBg=i===0?'rgba(255,215,0,0.06)':i===1?'rgba(192,192,192,0.04)':i===2?'rgba(205,127,50,0.04)':'rgba(0,0,0,0.1)';
-    return `<div class="leader-card leader-card-${i+1}" style="border-color:${cardBorder};background:#0a0a0a">
+    return `<div class="leader-card leader-card-${i+1}" style="border-color:${cardBorder};background:#000">
       <div class="leader-rank" style="color:${rankColor};background:${rankBg};text-shadow:2px 2px 0 ${rankShadow}">${i+1}</div>
       <div class="leader-info">
         <div class="leader-name" style="color:${color};text-shadow:2px 2px 0 ${shadow}">${p.name}</div>
