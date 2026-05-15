@@ -121,7 +121,23 @@ body{background:#000;min-height:100vh}
 .gl-bonus-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;margin:4px 2px;background:rgba(255,199,44,0.08);border:1px solid rgba(255,199,44,0.2);border-radius:4px}
 .gl-bonus-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;color:#FFC72C}
 .gl-bonus-pts{font-family:'Courier New',monospace;font-size:15px;font-weight:900;color:#FFC72C}
-/* BRACKET */
+/* LEADERS */
+.leaders-header{font-size:9px;color:#FFC72C;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;text-shadow:1px 1px 0 #8A6200;border-left:3px solid #FFC72C;padding-left:8px}
+.leader-card{position:relative;overflow:hidden;border:1px solid #1a1a1a;border-radius:4px;margin-bottom:8px;display:flex;align-items:stretch}
+.leader-card-1{min-height:90px;border-color:#FFD700}
+.leader-card-2{min-height:78px;border-color:#C0C0C0}
+.leader-card-3{min-height:68px;border-color:#CD7F32}
+.leader-card-4{min-height:58px;border-color:#444}
+.leader-rank{flex-shrink:0;width:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;font-family:'Courier New',monospace;border-right:1px solid #1a1a1a}
+.leader-info{flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;gap:2px;position:relative;z-index:2}
+.leader-name{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.leader-owner{font-size:7px;letter-spacing:1px;opacity:0.7;margin-top:1px}
+.leader-pts-row{display:flex;align-items:baseline;gap:3px;margin-top:4px}
+.leader-pts-num{font-size:20px;font-weight:900;font-family:'Courier New',monospace}
+.leader-pts-label{font-size:7px;color:#555;letter-spacing:1px}
+.leader-img{width:72px;flex-shrink:0;position:relative;overflow:hidden}
+.leader-img img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.leader-img::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.4) 40%,transparent 100%)}
 @keyframes bracketFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .bracket-section{margin-top:20px;opacity:0}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
@@ -249,6 +265,7 @@ body{background:#000;min-height:100vh}
     <button class="tab-btn" onclick="showTab('stats',this)">Stats</button>
     <button class="tab-btn" onclick="showTab('gamelog',this)">Game Log</button>
     <button class="tab-btn" onclick="showTab('matchups',this)">Today</button>
+    <button class="tab-btn" onclick="showTab('leaders',this)">Leaders</button>
   </div>
   <div id="leaderboard" class="section active">
     <div class="status-bar">
@@ -289,6 +306,14 @@ body{background:#000;min-height:100vh}
       <div class="status-text" id="gl-status">Loading game log...</div>
     </div>
     <div id="gl-rows"></div>
+    <div class="tab-footer">
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
+      <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
+    </div>
+  </div>
+  <div id="leaders" class="section">
+    <div class="leaders-header">Points Leaders</div>
+    <div id="leaders-rows"></div>
     <div class="tab-footer">
       <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
       <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
@@ -336,6 +361,14 @@ const GL_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm
 const RT_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR939zGJKqYXOEhSEm7yatgz1oFi8FPjB-peGrgVes1jd0ISu0txZKAIyJ6jKjQKVkWw9X5Os6p7d4j/pub?gid=140648245&single=true&output=csv';
 const OWNER_COLORS={'KMART':'#4ab3f4','The Fanchise':'#63c754','Mr. HUSTLE':'#E63A1E','AIR-EL':'#b57bee'};
 const OWNER_ORDER=['KMART','The Fanchise','Mr. HUSTLE','AIR-EL'];
+const PLAYER_IMAGES={
+  'Shai Gilgeous-Alexander':'players/sga.png',
+  'Cade Cunningham':'players/cunningham.png',
+  'Jalen Brunson':'players/brunson.png',
+  'Donovan Mitchell':'players/mitchell.png'
+};
+const RANK_COLORS=['#FFD700','#C0C0C0','#CD7F32','#666'];
+const RANK_SHADOWS=['#8A6200','#333','#5a3000','#000'];
 const MEDALS=['#FFD700','#C0C0C0','#CD7F32','#666'];
 const MEDAL_LABELS=['1ST','2ND','3RD','4TH'];
 const MEDAL_SHADOWS=['#8A6200','#333','#5a3000','#000'];
@@ -460,6 +493,7 @@ async function loadData(){
     renderLeaderboard(lbRows);
     renderStats(rtRows);
     renderGameLog(glData);
+    renderLeaders(rtRows);
     // Use last script run time from Settings tab B10
     let lastRun='';
     stLines.forEach(line=>{
@@ -778,6 +812,53 @@ function renderLeaderboard(rows){
         <div class="lb-score" style="color:${color};text-shadow:2px 2px 0 ${shadow},0 0 10px ${color}88">${Math.round(score)}</div>
         <div class="lb-behind">pts</div>
       </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaders(rows){
+  if(!rows.length){
+    document.getElementById('leaders-rows').innerHTML='<div class="empty-state">Stats populate after first game</div>';
+    return;
+  }
+  // Build player totals from Grand Total column
+  const totals=[];
+  rows.forEach(r=>{
+    const name=(r['Player Name']||'').trim();
+    const owner=(r['Owner']||'').trim();
+    const total=parseFloat(r['Grand Total']||0);
+    if(name&&owner&&total>0) totals.push({name,owner,total});
+  });
+  // Sort descending, take top 4
+  totals.sort((a,b)=>b.total-a.total);
+  const top4=totals.slice(0,4);
+  if(!top4.length){
+    document.getElementById('leaders-rows').innerHTML='<div class="empty-state">No data yet</div>';
+    return;
+  }
+  const BASE_URL='https://rarel12.github.io/nba2026challenge/';
+  document.getElementById('leaders-rows').innerHTML=top4.map((p,i)=>{
+    const color=OWNER_COLORS[p.owner]||'#888';
+    const shadow=OWNER_SHADOWS[p.owner]||'#000';
+    const rankColor=RANK_COLORS[i];
+    const rankShadow=RANK_SHADOWS[i];
+    const imgSrc=PLAYER_IMAGES[p.name]?BASE_URL+PLAYER_IMAGES[p.name]:'';
+    const imgHTML=imgSrc
+      ?`<div class="leader-img"><img src="${imgSrc}" alt="${p.name}" onerror="this.parentElement.style.background='rgba(0,0,0,0.3)'"/></div>`
+      :`<div class="leader-img" style="background:rgba(0,0,0,0.2)"></div>`;
+    const cardBorder=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#333';
+    const rankBg=i===0?'rgba(255,215,0,0.06)':i===1?'rgba(192,192,192,0.04)':i===2?'rgba(205,127,50,0.04)':'rgba(0,0,0,0.1)';
+    return `<div class="leader-card leader-card-${i+1}" style="border-color:${cardBorder};background:#0a0a0a">
+      <div class="leader-rank" style="color:${rankColor};background:${rankBg};text-shadow:2px 2px 0 ${rankShadow}">${i+1}</div>
+      <div class="leader-info">
+        <div class="leader-name" style="color:${color};text-shadow:2px 2px 0 ${shadow}">${p.name}</div>
+        <div class="leader-owner" style="color:${color}">${p.owner}</div>
+        <div class="leader-pts-row">
+          <span class="leader-pts-num" style="color:${color};text-shadow:2px 2px 0 ${shadow},0 0 10px ${color}88">${Math.round(p.total)}</span>
+          <span class="leader-pts-label">PTS</span>
+        </div>
+      </div>
+      ${imgHTML}
     </div>`;
   }).join('');
 }
