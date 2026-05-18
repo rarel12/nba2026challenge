@@ -138,14 +138,59 @@ body{background:#000;min-height:100vh}
 .leader-img{width:110px;flex-shrink:0;position:relative;overflow:hidden;background:#000;display:flex;align-items:flex-end;justify-content:center}
 .leader-img img{height:90px;width:auto;display:block;object-fit:contain;object-position:bottom center}
 @keyframes bracketFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* BATTLE VIEW */
+.battle-header-bar{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #F5C518;border-bottom:3px solid #B87800;background:repeating-linear-gradient(180deg,#F5C518 0px,#F5C518 2px,#E0A010 2px,#E0A010 3px,#F5C518 3px,#F5C518 5px,#E8B010 5px,#E8B010 6px)}
+.battle-back-btn{font-size:9px;font-weight:900;color:#fff;background:rgba(0,0,0,0.65);padding:3px 8px;border-radius:3px;letter-spacing:1px;border:none;cursor:pointer;font-family:'Courier New',monospace}
+.battle-series-pill{font-size:8px;font-weight:900;color:#fff;background:rgba(0,0,0,0.65);padding:3px 8px;border-radius:3px;letter-spacing:1px;font-family:'Courier New',monospace}
+.battle-series-bar{background:#000;padding:6px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1a1a}
+.battle-series-teams{font-size:12px;font-weight:900;color:#FFC72C;letter-spacing:1px;text-shadow:1px 1px 0 #8A6200}
+.battle-series-record{font-size:8px;color:#555;letter-spacing:1px}
+.battle-game-tabs{display:flex;background:#000;border-bottom:1px solid #1a1a1a;overflow-x:auto}
+.battle-game-tab{flex-shrink:0;padding:8px 12px;font-size:8px;font-weight:700;color:rgba(255,199,44,0.3);letter-spacing:1px;border-bottom:3px solid transparent;text-transform:uppercase;white-space:nowrap;cursor:pointer;font-family:'Courier New',monospace;background:none;border-top:none;border-left:none;border-right:none}
+.battle-game-tab.active{color:#FFC72C;border-bottom-color:#FFC72C}
+.battle-arena{display:flex;justify-content:space-between;align-items:center;padding:14px 12px;border-bottom:1px solid #1a1a1a;gap:8px;background:#000}
+.battle-team-block{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.battle-team-logo{width:60px;height:60px;display:flex;align-items:center;justify-content:center}
+.battle-team-logo img{width:54px;height:54px;object-fit:contain;image-rendering:pixelated}
+.battle-team-name{font-size:11px;font-weight:900;color:#FFC72C;letter-spacing:1px;text-shadow:1px 1px 0 #8A6200}
+.battle-team-seed{font-size:7px;color:#555;letter-spacing:1px}
+.battle-team-score{font-size:22px;font-weight:900;font-family:'Courier New',monospace}
+.battle-score-label{font-size:6px;color:#444;letter-spacing:1px}
+.battle-vs-block{display:flex;flex-direction:column;align-items:center;gap:6px}
+.battle-vs-text{font-size:9px;color:#333;letter-spacing:2px}
+.battle-status{font-size:8px;font-weight:700;letter-spacing:1px}
+.battle-status.live{color:#22c55e}
+.battle-status.final{color:#555}
+.battle-status.upcoming{color:#1E90FF}
+.battle-split-stats{display:flex;border-top:1px solid #1a1a1a;background:#000}
+.battle-stat-panel{flex:1;padding:8px;border-right:1px solid #1a1a1a}
+.battle-stat-panel:last-child{border-right:none}
+.battle-stat-panel-title{font-size:6px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #1a1a1a}
+.battle-stat-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.battle-stat-left{display:flex;flex-direction:column}
+.battle-stat-player{font-size:8px;font-weight:700;color:#ddd;letter-spacing:0.5px}
+.battle-stat-owner{font-size:6px;letter-spacing:0.5px;opacity:0.6;margin-top:1px}
+.battle-stat-line{font-size:6px;color:#444;letter-spacing:0.5px;margin-top:1px}
+.battle-stat-pts{font-size:11px;font-weight:900;font-family:'Courier New',monospace}
+.battle-stat-pts-label{font-size:6px;color:#444;letter-spacing:1px;text-align:right}
+.battle-no-players{font-size:8px;color:#333;letter-spacing:1px;padding:8px 0;text-align:center}
 .bracket-section{margin-top:20px;opacity:0}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
-.bracket-conf-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:8px;opacity:1;padding-bottom:5px;border-bottom:1px solid}
-.bracket-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.bracket-card{border-radius:6px;padding:10px 12px}
-.bracket-team-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
-.bracket-team-row:last-of-type{border-bottom:none}
-.bracket-team-left{display:flex;align-items:center;gap:5px}
+.bracket-conf-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid}
+.bracket-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.bracket-card{border-radius:5px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;cursor:pointer;min-height:80px;transition:opacity 0.15s}
+.bracket-card:active{opacity:0.7}
+.bracket-bg-logo-left{position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:80px;height:80px;object-fit:contain;opacity:0.12;pointer-events:none;mix-blend-mode:screen}
+.bracket-bg-logo-right{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:80px;height:80px;object-fit:contain;opacity:0.12;pointer-events:none;mix-blend-mode:screen}
+.bracket-team-side{display:flex;align-items:center;gap:4px;z-index:1}
+.bracket-seed{font-size:8px;color:#555;letter-spacing:1px;font-family:'Courier New',monospace}
+.bracket-team{font-size:13px;font-weight:900;letter-spacing:1px;text-shadow:2px 2px 0 rgba(0,0,0,0.8)}
+.bracket-middle{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;z-index:1}
+.bracket-score-row{display:flex;align-items:center;gap:10px}
+.bracket-win-num{font-size:26px;font-weight:900;font-family:'Courier New',monospace}
+.bracket-dash{font-size:16px;color:#333}
+.bracket-series-status{font-size:6px;letter-spacing:2px;color:#555;text-transform:uppercase;font-family:'Courier New',monospace}
+.bracket-clinched-badge{font-size:6px;color:#FFD700;letter-spacing:1px;font-family:'Courier New',monospace}
 .bracket-seed{font-size:9px;color:#888;font-family:'Courier New',monospace}
 .bracket-team{font-size:13px;font-weight:700}
 .bracket-wins{font-size:14px;font-weight:900;font-family:'Courier New',monospace}
@@ -313,6 +358,22 @@ body{background:#000;min-height:100vh}
   <div id="leaders" class="section">
     <div class="leaders-header">Points Leaders</div>
     <div id="leaders-rows"></div>
+    <div class="tab-footer">
+      <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
+      <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
+    </div>
+  </div>
+  <div id="battle" class="section">
+    <div class="battle-header-bar">
+      <button class="battle-back-btn" onclick="closeBattle()">← BACK</button>
+      <div class="battle-series-pill" id="battle-pill"></div>
+    </div>
+    <div class="battle-series-bar">
+      <div class="battle-series-teams" id="battle-teams"></div>
+      <div class="battle-series-record" id="battle-record"></div>
+    </div>
+    <div class="battle-game-tabs" id="battle-game-tabs"></div>
+    <div id="battle-content"></div>
     <div class="tab-footer">
       <img src="https://rarel12.github.io/nba2026challenge/spaceball.png" alt=""/>
       <div class="tab-footer-text">NBA Playoff Challenge 2026</div>
@@ -636,32 +697,34 @@ function renderBracket(games,ssRows){
     const clinched=clinched1||clinched2;
     const winner=clinched1?team1:clinched2?team2:null;
 
-    const t1Color=clinched1?'#FFC72C':clinched2?'#444':t1Leads?'#FFC72C':tied?'#fff':'#555';
-    const t2Color=clinched2?'#FFC72C':clinched1?'#444':t2Leads?'#FFC72C':tied?'#fff':'#555';
-    const cardBg=clinched?'#0d1a2e':bg;
-    const cardBorder=clinched?'#b8860b':border;
+    const t1Color=clinched1?'#FFC72C':clinched2?'#555':t1Leads?'#FFC72C':tied?'#fff':'#555';
+    const t2Color=clinched2?'#FFC72C':clinched1?'#555':t2Leads?'#FFC72C':tied?'#fff':'#555';
+    const t1Shadow=clinched1||t1Leads?'2px 2px 0 #8A6200':'2px 2px 0 rgba(0,0,0,0.8)';
+    const t2Shadow=clinched2||t2Leads?'2px 2px 0 #8A6200':'2px 2px 0 rgba(0,0,0,0.8)';
+    const cardBg=clinched?'#0d1a2e':'#0a0a0a';
+    const cardBorder=clinched?'#b8860b':'#1a1a1a';
+    const statusText=clinched?'● SERIES CLINCHED':'';
+    const statusClass=clinched?'bracket-clinched-badge':'bracket-series-status';
 
-    const logoAbbr=winner?winner.toLowerCase():'';
-    const logoHTML=winner?`<img src="https://a.espncdn.com/i/teamlogos/nba/500/${logoAbbr}.png" alt="" style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:72px;height:72px;object-fit:contain;opacity:0.15;pointer-events:none;mix-blend-mode:screen"/>`:'';
-    const clinchedBadge=clinched?`<div style="font-size:6px;letter-spacing:1px;color:#FFD700;margin-top:3px;position:relative;z-index:1">● SERIES CLINCHED</div>`:'';
-
-    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder};position:relative;overflow:hidden">
-      ${logoHTML}
-      <div class="bracket-team-row" style="position:relative;z-index:1;opacity:${clinched2?0.35:1}">
-        <div class="bracket-team-left">
-          <span class="bracket-seed">${seed1}</span>
-          <span class="bracket-team" style="color:${t1Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${team1}</span>
-        </div>
-        <span class="bracket-wins" style="color:${t1Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${w1}</span>
+    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
+      <img class="bracket-bg-logo-left" src="https://rarel12.github.io/nba2026challenge/logos/${team1.toLowerCase()}.png" alt=""/>
+      <img class="bracket-bg-logo-right" src="https://rarel12.github.io/nba2026challenge/logos/${team2.toLowerCase()}.png" alt=""/>
+      <div class="bracket-team-side">
+        <span class="bracket-seed">${seed1}</span>
+        <span class="bracket-team" style="color:${t1Color};text-shadow:${t1Shadow}">${team1}</span>
       </div>
-      <div class="bracket-team-row" style="position:relative;z-index:1;opacity:${clinched1?0.35:1}">
-        <div class="bracket-team-left">
-          <span class="bracket-seed">${seed2}</span>
-          <span class="bracket-team" style="color:${t2Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${team2}</span>
+      <div class="bracket-middle">
+        <div class="bracket-score-row">
+          <span class="bracket-win-num" style="color:${t1Color};text-shadow:${t1Shadow}">${w1}</span>
+          <span class="bracket-dash">—</span>
+          <span class="bracket-win-num" style="color:${t2Color};text-shadow:${t2Shadow}">${w2}</span>
         </div>
-        <span class="bracket-wins" style="color:${t2Color};text-shadow:1px 1px 0 rgba(0,0,0,0.8)">${w2}</span>
+        <div class="${statusClass}">${statusText||document.getElementById('round-pill').textContent}</div>
       </div>
-      ${clinchedBadge}
+      <div class="bracket-team-side">
+        <span class="bracket-seed">${seed2}</span>
+        <span class="bracket-team" style="color:${t2Color};text-shadow:${t2Shadow}">${team2}</span>
+      </div>
     </div>`;
     if(isEast)eastHTML+=card;else westHTML+=card;
   });
@@ -1052,6 +1115,193 @@ function togglePlayer(id,btn){
   const d=document.getElementById(id);const open=d.classList.contains('open');
   d.classList.toggle('open',!open);btn.classList.toggle('open',!open);
 }
+let battleState={team1:'',team2:'',seed1:'',seed2:'',w1:0,w2:0};
+
+function openBattle(team1,team2,seed1,seed2,w1,w2){
+  battleState={team1,team2,seed1,seed2,w1:parseInt(w1),w2:parseInt(w2)};
+  const roundLabel=document.getElementById('round-pill').textContent||'';
+  document.getElementById('battle-pill').textContent=roundLabel;
+  document.getElementById('battle-teams').textContent=team1+' vs '+team2;
+  const w1n=parseInt(w1),w2n=parseInt(w2);
+  const record=w1n===0&&w2n===0?'SERIES 0-0':w1n>w2n?team1+' LEADS '+w1n+'-'+w2n:w2n>w1n?team2+' LEADS '+w2n+'-'+w1n:'TIED '+w1n+'-'+w2n;
+  document.getElementById('battle-record').textContent=record;
+
+  // Build game tabs from game log data
+  const seriesGames=getBattleGames(team1,team2);
+  const totalGames=Math.max(w1n+w2n,1);
+  renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2);
+
+  // Show battle section
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('battle').classList.add('active');
+}
+
+function closeBattle(){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('leaderboard').classList.add('active');
+  // Re-activate standings tab button
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.tab-btn').classList.add('active');
+}
+
+function getBattleGames(team1,team2){
+  // Group glData by game number for players on these two teams
+  const TRACKED_TEAMS={};
+  // Build team -> players map from TRACKED_PLAYERS in Today tab logic
+  const trackedPlayers=[
+    {name:'Shai Gilgeous-Alexander',owner:'KMART',team:'OKC'},
+    {name:'Anthony Edwards',owner:'KMART',team:'MIN'},
+    {name:'LeBron James',owner:'KMART',team:'LAL'},
+    {name:"De'Aaron Fox",owner:'KMART',team:'SAS'},
+    {name:'Evan Mobley',owner:'KMART',team:'CLE'},
+    {name:'Jaylen Brown',owner:'KMART',team:'BOS'},
+    {name:'Devin Booker',owner:'KMART',team:'PHX'},
+    {name:'Jalen Brunson',owner:'The Fanchise',team:'NYK'},
+    {name:'Jalen Duren',owner:'The Fanchise',team:'DET'},
+    {name:'James Harden',owner:'The Fanchise',team:'CLE'},
+    {name:'Nikola Jokic',owner:'The Fanchise',team:'DEN'},
+    {name:'Jayson Tatum',owner:'The Fanchise',team:'BOS'},
+    {name:'Aaron Gordon',owner:'The Fanchise',team:'DEN'},
+    {name:'Payton Pritchard',owner:'The Fanchise',team:'BOS'},
+    {name:'Cade Cunningham',owner:'Mr. HUSTLE',team:'DET'},
+    {name:'Kevin Durant',owner:'Mr. HUSTLE',team:'HOU'},
+    {name:'Karl-Anthony Towns',owner:'Mr. HUSTLE',team:'NYK'},
+    {name:'Chet Holmgren',owner:'Mr. HUSTLE',team:'OKC'},
+    {name:'Stephon Castle',owner:'Mr. HUSTLE',team:'SAS'},
+    {name:'Jamal Murray',owner:'Mr. HUSTLE',team:'DEN'},
+    {name:'Jalen Johnson',owner:'Mr. HUSTLE',team:'ATL'},
+    {name:'Victor Wembanyama',owner:'AIR-EL',team:'SAS'},
+    {name:'Donovan Mitchell',owner:'AIR-EL',team:'CLE'},
+    {name:'Jalen Williams',owner:'AIR-EL',team:'OKC'},
+    {name:'Tyrese Maxey',owner:'AIR-EL',team:'PHI'},
+    {name:'Tobias Harris',owner:'AIR-EL',team:'DET'},
+    {name:'Alperen Sengun',owner:'AIR-EL',team:'HOU'},
+    {name:'Derrick White',owner:'AIR-EL',team:'BOS'}
+  ];
+  trackedPlayers.forEach(p=>{
+    if(!TRACKED_TEAMS[p.team])TRACKED_TEAMS[p.team]={};
+    TRACKED_TEAMS[p.team][p.name]={owner:p.owner,team:p.team};
+  });
+
+  const t1Players=TRACKED_TEAMS[team1]||{};
+  const t2Players=TRACKED_TEAMS[team2]||{};
+  const relevantPlayers={...t1Players,...t2Players};
+
+  // Group game log rows by game number within current round
+  const currentRound=(document.getElementById('round-pill').textContent||'').trim();
+  const gameMap={};
+  glData.forEach(r=>{
+    const player=(r['Player']||'').trim();
+    const round=(r['Round']||'').trim();
+    if(!relevantPlayers[player])return;
+    if(round.toUpperCase()!==currentRound.toUpperCase())return;
+    const gameNum=parseInt((r['Game #']||'').toString().replace(/[^0-9]/g,''));
+    if(!gameNum||isNaN(gameNum))return;
+    if(!gameMap[gameNum])gameMap[gameNum]={t1:[],t2:[]};
+    const info=relevantPlayers[player];
+    const row={name:player,owner:info.owner,pts:parseInt(r['PTS']||0),reb:parseInt(r['REB']||0),ast:parseInt(r['AST']||0),total:parseFloat(r['Total']||0)};
+    if(t1Players[player])gameMap[gameNum].t1.push(row);
+    else gameMap[gameNum].t2.push(row);
+  });
+  return gameMap;
+}
+
+function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
+  const playedGames=Object.keys(seriesGames).map(Number).sort((a,b)=>a-b);
+  const tabs=document.getElementById('battle-game-tabs');
+  tabs.innerHTML='';
+
+  if(playedGames.length===0){
+    // No games played yet
+    const btn=document.createElement('button');
+    btn.className='battle-game-tab active';
+    btn.textContent='GAME 1';
+    tabs.appendChild(btn);
+    renderBattleGame(null,team1,team2,seed1,seed2,'upcoming');
+    return;
+  }
+
+  playedGames.forEach((gNum,i)=>{
+    const btn=document.createElement('button');
+    btn.className='battle-game-tab'+(i===playedGames.length-1?' active':'');
+    btn.textContent='GAME '+gNum;
+    btn.onclick=()=>{
+      document.querySelectorAll('.battle-game-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderBattleGame(seriesGames[gNum],team1,team2,seed1,seed2,'final');
+    };
+    tabs.appendChild(btn);
+  });
+
+  // Render last played game by default
+  const lastGame=playedGames[playedGames.length-1];
+  renderBattleGame(seriesGames[lastGame],team1,team2,seed1,seed2,'final');
+}
+
+function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
+  const isUpcoming=status==='upcoming'||!gameData;
+  const t1Players=gameData?gameData.t1:[];
+  const t2Players=gameData?gameData.t2:[];
+  const t1Color='#4ab3f4';
+  const t2Color='#63c754';
+
+  const statusClass=isUpcoming?'upcoming':status==='live'?'live':'final';
+  const statusText=isUpcoming?'UPCOMING':status==='live'?'● LIVE':'FINAL';
+
+  const arenaHTML=`<div class="battle-arena">
+    <div class="battle-team-block">
+      <div class="battle-team-seed">SEED ${seed1}</div>
+      <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team1.toLowerCase()}.png" alt="${team1}"/></div>
+      <div class="battle-team-name">${team1}</div>
+      ${!isUpcoming?`<div class="battle-team-score" style="color:#fff;text-shadow:2px 2px 0 #000">—</div><div class="battle-score-label">PTS</div>`:''}
+    </div>
+    <div class="battle-vs-block">
+      <div class="battle-vs-text">VS</div>
+      <div class="battle-status ${statusClass}">${statusText}</div>
+    </div>
+    <div class="battle-team-block">
+      <div class="battle-team-seed">SEED ${seed2}</div>
+      <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team2.toLowerCase()}.png" alt="${team2}"/></div>
+      <div class="battle-team-name">${team2}</div>
+      ${!isUpcoming?`<div class="battle-team-score" style="color:#fff;text-shadow:2px 2px 0 #000">—</div><div class="battle-score-label">PTS</div>`:''}
+    </div>
+  </div>`;
+
+  const buildPanel=(players,teamName,teamColor,side)=>{
+    if(!players.length) return `<div class="battle-no-players">NO TRACKED<br>PLAYERS</div>`;
+    return players.map(p=>{
+      const color=OWNER_COLORS[p.owner]||'#888';
+      const shadow=OWNER_SHADOWS[p.owner]||'#000';
+      const isStar=playerStar[p.name]==='Yes';
+      const statLine=isStar?`${p.reb} REB · ${p.ast} AST`:'';
+      return `<div class="battle-stat-row">
+        <div class="battle-stat-left">
+          <div class="battle-stat-player">${p.name.split(' ').pop()}${isStar?' ★':''}</div>
+          <div class="battle-stat-owner" style="color:${color}">${p.owner}</div>
+          ${statLine?`<div class="battle-stat-line">${statLine}</div>`:''}
+        </div>
+        <div>
+          <div class="battle-stat-pts" style="color:${color};text-shadow:0 0 8px ${color}88">${isUpcoming?'—':p.pts}</div>
+          <div class="battle-stat-pts-label">PTS</div>
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  const statsHTML=`<div class="battle-split-stats">
+    <div class="battle-stat-panel">
+      <div class="battle-stat-panel-title" style="color:#4ab3f4">${team1}</div>
+      ${buildPanel(t1Players,team1,'#4ab3f4','left')}
+    </div>
+    <div class="battle-stat-panel">
+      <div class="battle-stat-panel-title" style="color:#63c754;text-align:right">${team2}</div>
+      ${buildPanel(t2Players,team2,'#63c754','right')}
+    </div>
+  </div>`;
+
+  document.getElementById('battle-content').innerHTML=arenaHTML+statsHTML;
+}
+
 function showTab(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
