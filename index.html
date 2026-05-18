@@ -152,8 +152,9 @@ body{background:#000;min-height:100vh}
 .battle-team-block{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
 .battle-team-logo{width:60px;height:60px;display:flex;align-items:center;justify-content:center}
 .battle-team-logo img{width:54px;height:54px;object-fit:contain;image-rendering:pixelated}
+.battle-team-nameline{display:flex;align-items:center;gap:4px;justify-content:center}
+.battle-team-seed-inline{font-size:8px;color:#888;letter-spacing:1px;font-family:'Courier New',monospace}
 .battle-team-name{font-size:11px;font-weight:900;color:#FFC72C;letter-spacing:1px;text-shadow:1px 1px 0 #8A6200}
-.battle-team-seed{font-size:7px;color:#555;letter-spacing:1px}
 .battle-team-score{font-size:22px;font-weight:900;font-family:'Courier New',monospace}
 .battle-score-label{font-size:6px;color:#444;letter-spacing:1px}
 .battle-vs-block{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -165,7 +166,7 @@ body{background:#000;min-height:100vh}
 .battle-split-stats{display:flex;border-top:1px solid #1a1a1a;background:#000}
 .battle-stat-panel{flex:1;padding:8px;border-right:1px solid #1a1a1a}
 .battle-stat-panel:last-child{border-right:none}
-.battle-stat-panel-title{font-size:6px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #1a1a1a}
+.battle-stat-panel-title{font-size:6px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #1a1a1a;color:#fff}
 .battle-stat-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .battle-stat-left{display:flex;flex-direction:column}
 .battle-stat-player{font-size:8px;font-weight:700;color:#ddd;letter-spacing:0.5px}
@@ -299,16 +300,24 @@ body{background:#000;min-height:100vh}
 </div>
 
 <div id="app">
-  <div class="app-bar">
-    <div class="app-title">NBA Playoff Challenge 2026</div>
-    <div class="round-pill" id="round-pill">1ST ROUND</div>
+  <div id="app-chrome">
+    <div class="app-bar">
+      <div class="app-title">NBA Playoff Challenge 2026</div>
+      <div class="round-pill" id="round-pill">1ST ROUND</div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showTab('leaderboard',this)">Standings</button>
+      <button class="tab-btn" onclick="showTab('stats',this)">Stats</button>
+      <button class="tab-btn" onclick="showTab('gamelog',this)">Game Log</button>
+      <button class="tab-btn" onclick="showTab('matchups',this)">Today</button>
+      <button class="tab-btn" onclick="showTab('leaders',this)">Leaders</button>
+    </div>
   </div>
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="showTab('leaderboard',this)">Standings</button>
-    <button class="tab-btn" onclick="showTab('stats',this)">Stats</button>
-    <button class="tab-btn" onclick="showTab('gamelog',this)">Game Log</button>
-    <button class="tab-btn" onclick="showTab('matchups',this)">Today</button>
-    <button class="tab-btn" onclick="showTab('leaders',this)">Leaders</button>
+  <div id="battle-chrome" style="display:none">
+    <div class="battle-header-bar">
+      <button class="battle-back-btn" onclick="closeBattle()">← BACK</button>
+      <div class="battle-series-pill" id="battle-pill"></div>
+    </div>
   </div>
   <div id="leaderboard" class="section active">
     <div class="status-bar">
@@ -363,10 +372,6 @@ body{background:#000;min-height:100vh}
     </div>
   </div>
   <div id="battle" class="section">
-    <div class="battle-header-bar">
-      <button class="battle-back-btn" onclick="closeBattle()">← BACK</button>
-      <div class="battle-series-pill" id="battle-pill"></div>
-    </div>
     <div class="battle-series-bar">
       <div class="battle-series-teams" id="battle-teams"></div>
       <div class="battle-series-record" id="battle-record"></div>
@@ -487,11 +492,8 @@ function startApp(){
       document.getElementById('transition').style.display='block';
       w.style.transition='transform 0.25s ease-out';w.style.transform='translateX(100%)';
       setTimeout(()=>{w.style.display='none';},260);
-      // Image fades in
       setTimeout(()=>{document.getElementById('trans-img').classList.add('in');},100);
-      // Progress bar starts
       setTimeout(()=>{document.getElementById('trans-bar').classList.add('go');},100);
-      // Advance to app after 3 seconds
       setTimeout(()=>{
         const w2=document.getElementById('wipe');
         w2.style.display='block';w2.style.transform='translateX(-100%)';w2.style.transition='transform 0.25s ease-in';
@@ -518,7 +520,6 @@ async function loadData(){
       fetch(RT_URL+'&t='+t),fetch(PL_URL+'&t='+t),fetch(ST_URL+'&t='+t)
     ]);
     const [lbT,glT,rtT,plT,stT]=await Promise.all([lbR.text(),glR.text(),rtR.text(),plR.text(),stR.text()]);
-    // Pull current round from Settings tab
     const stLines=stT.trim().split('\n');
     let currentRound='1ST ROUND';
     stLines.forEach(line=>{
@@ -531,7 +532,6 @@ async function loadData(){
     const lbRows=parseLeaderboardCSV(lbT);
     glData=parseCSV(glT).filter(r=>r['Player']&&r['Player']!=='Waiting for first game data...'&&r['Player']!=='Player');
     const rtRows=parseRunningTotals(rtT);
-    // Build player status lookup from Players tab
     playerStatus={};
     const plLines=plT.trim().split('\n');
     let plHi=0;
@@ -553,7 +553,6 @@ async function loadData(){
     renderStats(rtRows);
     renderGameLog(glData);
     renderLeaders(rtRows);
-    // Use last script run time from Settings tab B10
     let lastRun='';
     stLines.forEach(line=>{
       if(line.toLowerCase().includes('last script run')){
@@ -573,7 +572,7 @@ async function loadData(){
   }
 }
 
-let lastGoodGames=null; // in-memory cache — survives localStorage purges
+let lastGoodGames=null;
 
 async function loadMatchups(){
   try{
@@ -593,21 +592,17 @@ async function loadMatchups(){
     const yesterday=new Date(nowCT);yesterday.setDate(yesterday.getDate()-1);
     const yesterdayKey='cachedGames_'+yesterday.toLocaleDateString('en-CA');
 
-    // At 5am CT clear stale cache and in-memory store
     if(hourCT>=5){
       Object.keys(localStorage).filter(k=>k.startsWith('cachedGames_')&&k!==todayKey).forEach(k=>localStorage.removeItem(k));
-      // Only clear in-memory if it's from a previous day
       if(lastGoodGames&&lastGoodGames.date!==todayKey) lastGoodGames=null;
     }
 
     if(data.games&&data.games.length>0){
-      // Fresh ESPN data — update both caches
       lastGoodGames={games:data.games,date:todayKey};
       try{localStorage.setItem(todayKey,JSON.stringify(data.games));}catch(e){}
       renderMatchups(data.games);
       document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
     } else {
-      // ESPN empty — try in-memory first, then localStorage, before 5am only
       if(hourCT<5){
         let cached=null;
         if(lastGoodGames) cached=lastGoodGames.games;
@@ -628,7 +623,6 @@ async function loadMatchups(){
       }
     }
   }catch(e){
-    // On fetch error, show in-memory cache if available
     const nowCT=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'}));
     const hourCT=nowCT.getHours();
     if(lastGoodGames&&hourCT<5){
@@ -644,26 +638,13 @@ async function loadMatchups(){
 }
 
 function renderBracket(games,ssRows){
-  // Build live seriesText map from today's games
   const seriesMap={};
   games.forEach(g=>{
-    // Only use live seriesText during active games — not completed ones
     if(g.statusState==='in'&&g.seriesText&&g.seriesText.length>0){
       seriesMap[g.homeTeam+'_'+g.awayTeam]=g.seriesText;
       seriesMap[g.awayTeam+'_'+g.homeTeam]=g.seriesText;
     }
   });
-
-  const parseWins=(text,team1)=>{
-    if(!text)return null;
-    const m=text.match(/([A-Z]+)\s+leads\s+series\s+(\d+)-(\d+)/i);
-    if(m){
-      const leader=m[1].toUpperCase();
-      const w=parseInt(m[2]);const l=parseInt(m[3]);
-      return leader===team1.toUpperCase()?{w1:w,w2:l}:{w1:l,w2:w};
-    }
-    return null;
-  };
 
   if(!ssRows||!ssRows.length){
     document.getElementById('bracket-section').innerHTML='';
@@ -679,10 +660,6 @@ function renderBracket(games,ssRows){
     const team2=(s['Team2']||'').toUpperCase();
     let w1=parseInt(s['W1'])||0;
     let w2=parseInt(s['W2'])||0;
-
-
-    // Note: ESPN override removed — sheet data is source of truth
-    // Live seriesText from ESPN was causing incorrect win counts
 
     const t1Leads=w1>w2;
     const t2Leads=w2>w1;
@@ -777,9 +754,7 @@ function renderMatchups(games){
       html+=`<div class="tm-section-label"><div class="tm-section-dot" style="background:#1E90FF"></div><div class="tm-section-text" style="color:#1E90FF">Upcoming</div></div>`;
     }
 
-    const dotColor=isLive?'#22c55e':isPost?'#E63A1E':'#444';
     const scoreHTML=isPre?'':`<span class="tm-game-score">${game.awayScore} - ${game.homeScore}</span>`;
-    // Format tip time from UTC to local
     let tipDisplay=game.status;
     if(isPre&&game.date){
       try{
@@ -800,7 +775,6 @@ function renderMatchups(games){
       <div class="tm-game-right">${scoreHTML}${statusHTML}</div>
     </div>`;
 
-    // For pre-game use TRACKED roster, for live/final use box score data
     const playersToShow = isPre
       ? TRACKED.filter(p=>p.team===game.homeTeam||p.team===game.awayTeam)
       : (game.players||[]);
@@ -887,7 +861,6 @@ function renderLeaders(rows){
     document.getElementById('leaders-rows').innerHTML='<div class="empty-state">Stats populate after first game</div>';
     return;
   }
-  // Build player totals from Grand Total column
   const totals=[];
   rows.forEach(r=>{
     const name=(r['Player Name']||'').trim();
@@ -895,7 +868,6 @@ function renderLeaders(rows){
     const total=parseFloat((r['Grand Total']||'0').replace(/,/g,''));
     if(name&&owner&&total>0) totals.push({name,owner,total});
   });
-  // Sort descending, take top 4
   totals.sort((a,b)=>b.total-a.total);
   const top4=totals.slice(0,4);
   if(!top4.length){
@@ -903,7 +875,6 @@ function renderLeaders(rows){
     return;
   }
   const BASE_URL='https://rarel12.github.io/nba2026challenge/';
-  // Assign ranks with tie detection
   const assignedRanks=[];
   top4.forEach((p,i)=>{
     if(i===0){assignedRanks.push(1);return;}
@@ -944,7 +915,6 @@ function renderStats(rows){
     document.getElementById('stats-rows').innerHTML='<div class="empty-state">Stats populate after first game</div>';
     return;
   }
-  // Group by owner preserving sheet order
   const grouped={};
   OWNER_ORDER.forEach(o=>grouped[o]=[]);
   rows.forEach(r=>{if(grouped[r['Owner']])grouped[r['Owner']].push(r);});
@@ -1006,7 +976,6 @@ function renderGameLog(data){
     document.getElementById('gl-rows').innerHTML='<div class="empty-state">Game log populates after first game</div>';
     return;
   }
-  // owner -> player -> round -> [games]
   const ownerMap={};
   OWNER_ORDER.forEach(o=>ownerMap[o]={});
   data.forEach(r=>{
@@ -1093,7 +1062,6 @@ function renderGameLog(data){
   document.getElementById('gl-rows').innerHTML=html;
 }
 
-// Pull to refresh and visibility refresh for Today tab
 let touchStartY=0;
 document.addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY;},{passive:true});
 document.addEventListener('touchend',e=>{
@@ -1105,7 +1073,6 @@ document.addEventListener('touchend',e=>{
   }
 },{passive:true});
 
-// Refresh Today tab when app becomes visible again
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden){
     const tmSection=document.getElementById('matchups');
@@ -1130,28 +1097,31 @@ function openBattle(team1,team2,seed1,seed2,w1,w2){
   const record=w1n===0&&w2n===0?'SERIES 0-0':w1n>w2n?team1+' LEADS '+w1n+'-'+w2n:w2n>w1n?team2+' LEADS '+w2n+'-'+w1n:'TIED '+w1n+'-'+w2n;
   document.getElementById('battle-record').textContent=record;
 
-  // Build game tabs from game log data
+  // Swap chrome: hide app-bar+tab-bar, show battle-chrome
+  document.getElementById('app-chrome').style.display='none';
+  document.getElementById('battle-chrome').style.display='block';
+
   const seriesGames=getBattleGames(team1,team2);
   const totalGames=Math.max(w1n+w2n,1);
   renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2);
 
-  // Show battle section
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('battle').classList.add('active');
 }
 
 function closeBattle(){
+  // Restore chrome
+  document.getElementById('app-chrome').style.display='block';
+  document.getElementById('battle-chrome').style.display='none';
+
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('leaderboard').classList.add('active');
-  // Re-activate standings tab button
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector('.tab-btn').classList.add('active');
 }
 
 function getBattleGames(team1,team2){
-  // Group glData by game number for players on these two teams
   const TRACKED_TEAMS={};
-  // Build team -> players map from TRACKED_PLAYERS in Today tab logic
   const trackedPlayers=[
     {name:'Shai Gilgeous-Alexander',owner:'KMART',team:'OKC'},
     {name:'Anthony Edwards',owner:'KMART',team:'MIN'},
@@ -1191,7 +1161,6 @@ function getBattleGames(team1,team2){
   const t2Players=TRACKED_TEAMS[team2]||{};
   const relevantPlayers={...t1Players,...t2Players};
 
-  // Group game log rows by game number within current round
   const currentRound=(document.getElementById('round-pill').textContent||'').trim();
   const gameMap={};
   glData.forEach(r=>{
@@ -1216,7 +1185,6 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
   tabs.innerHTML='';
 
   if(playedGames.length===0){
-    // No games played yet
     const btn=document.createElement('button');
     btn.className='battle-game-tab active';
     btn.textContent='GAME 1';
@@ -1237,7 +1205,6 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
     tabs.appendChild(btn);
   });
 
-  // Render last played game by default
   const lastGame=playedGames[playedGames.length-1];
   renderBattleGame(seriesGames[lastGame],team1,team2,seed1,seed2,'final');
 }
@@ -1246,17 +1213,17 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
   const isUpcoming=status==='upcoming'||!gameData;
   const t1Players=gameData?gameData.t1:[];
   const t2Players=gameData?gameData.t2:[];
-  const t1Color='#4ab3f4';
-  const t2Color='#63c754';
 
   const statusClass=isUpcoming?'upcoming':status==='live'?'live':'final';
   const statusText=isUpcoming?'UPCOMING':status==='live'?'● LIVE':'FINAL';
 
   const arenaHTML=`<div class="battle-arena">
     <div class="battle-team-block">
-      <div class="battle-team-seed">SEED ${seed1}</div>
       <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team1.toLowerCase()}.png" alt="${team1}"/></div>
-      <div class="battle-team-name">${team1}</div>
+      <div class="battle-team-nameline">
+        <span class="battle-team-seed-inline">${seed1}</span>
+        <span class="battle-team-name">${team1}</span>
+      </div>
       ${!isUpcoming?`<div class="battle-team-score" style="color:#fff;text-shadow:2px 2px 0 #000">—</div><div class="battle-score-label">PTS</div>`:''}
     </div>
     <div class="battle-vs-block">
@@ -1264,9 +1231,11 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
       <div class="battle-status ${statusClass}">${statusText}</div>
     </div>
     <div class="battle-team-block">
-      <div class="battle-team-seed">SEED ${seed2}</div>
       <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team2.toLowerCase()}.png" alt="${team2}"/></div>
-      <div class="battle-team-name">${team2}</div>
+      <div class="battle-team-nameline">
+        <span class="battle-team-seed-inline">${seed2}</span>
+        <span class="battle-team-name">${team2}</span>
+      </div>
       ${!isUpcoming?`<div class="battle-team-score" style="color:#fff;text-shadow:2px 2px 0 #000">—</div><div class="battle-score-label">PTS</div>`:''}
     </div>
   </div>`;
@@ -1294,11 +1263,11 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
 
   const statsHTML=`<div class="battle-split-stats">
     <div class="battle-stat-panel">
-      <div class="battle-stat-panel-title" style="color:#4ab3f4">${team1}</div>
+      <div class="battle-stat-panel-title">${team1}</div>
       ${buildPanel(t1Players,team1,'#4ab3f4','left')}
     </div>
     <div class="battle-stat-panel">
-      <div class="battle-stat-panel-title" style="color:#63c754;text-align:right">${team2}</div>
+      <div class="battle-stat-panel-title" style="text-align:right">${team2}</div>
       ${buildPanel(t2Players,team2,'#63c754','right')}
     </div>
   </div>`;
