@@ -402,10 +402,10 @@ const TRACKED=[
   {name:'Kevin Durant',owner:'Mr. HUSTLE',team:'HOU',star:false},
   {name:'Karl-Anthony Towns',owner:'Mr. HUSTLE',team:'NYK',star:false},
   {name:'Chet Holmgren',owner:'Mr. HUSTLE',team:'OKC',star:false},
-  {name:'Stephon Castle',owner:'Mr. HUSTLE',team:'SAS',star:false},
+  {name:'Stephon Castle',owner:'Mr. HUSTLE',team:'SAS',star:true},
   {name:'Jamal Murray',owner:'Mr. HUSTLE',team:'DEN',star:false},
   {name:'Jalen Johnson',owner:'Mr. HUSTLE',team:'ATL',star:false},
-  {name:'Victor Wembanyama',owner:'AIR-EL',team:'SAS',star:false},
+  {name:'Victor Wembanyama',owner:'AIR-EL',team:'SAS',star:true},
   {name:'Donovan Mitchell',owner:'AIR-EL',team:'CLE',star:false},
   {name:'Jalen Williams',owner:'AIR-EL',team:'OKC',star:false},
   {name:'Tyrese Maxey',owner:'AIR-EL',team:'PHI',star:true},
@@ -814,10 +814,11 @@ function renderMatchups(games){
       Object.entries(byOwner).forEach(([owner,players])=>{
         const color=OWNER_COLORS[owner]||'#888';
         players.forEach(p=>{
-          const starHTML=p.star?`<span class="tm-player-star">★</span>`:'';
+          const isStar=(playerStar[p.name]||'')==='Yes'||p.star;
+          const starHTML=isStar?`<span class="tm-player-star">★</span>`:'';
           const isInjuredTM=(playerStatus[p.name]||'').trim()==='Injured';
           const injuryHTML=isInjuredTM?`<span class="injury-ico" style="margin-left:3px">🩹</span>`:'';
-          const statsHTML=p.star
+          const statsHTML=isStar
             ?`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat">PTS</span>
               <span class="tm-stat-val">${p.reb}</span><span class="tm-stat">REB</span>
               <span class="tm-stat-val">${p.ast}</span><span class="tm-stat">AST</span>`
