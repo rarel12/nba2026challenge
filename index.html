@@ -687,24 +687,18 @@ function renderBracket(games,ssRows){
     const t1Leads=w1>w2;
     const t2Leads=w2>w1;
     const isEast=conf==='EAST';
-    const bg=isEast?'rgba(30,100,220,0.12)':'rgba(220,50,30,0.12)';
-    const border=isEast?'rgba(30,100,220,0.5)':'rgba(220,50,30,0.5)';
 
     const tied=w1===w2;
     const clinched1=w1>=4;
     const clinched2=w2>=4;
     const clinched=clinched1||clinched2;
-    const winner=clinched1?team1:clinched2?team2:null;
 
-    const tied=w1===w2;
-    const t1Leading=w1>w2;
-    const t2Leading=w2>w1;
-    const t1Color=clinched1?'#FFC72C':clinched2?'#555':t1Leading?'#FFC72C':tied?'#fff':'#555';
-    const t2Color=clinched2?'#FFC72C':clinched1?'#555':t2Leading?'#FFC72C':tied?'#fff':'#555';
-    const t1Shadow=t1Leading||clinched1?'1px 1px 0 #8A6200':'none';
-    const t2Shadow=t2Leading||clinched2?'1px 1px 0 #8A6200':'none';
-    const t1Opacity=clinched2?0.3:t2Leading?0.3:1;
-    const t2Opacity=clinched1?0.3:t1Leading?0.3:1;
+    const t1Color=clinched1?'#FFC72C':clinched2?'#555':t1Leads?'#FFC72C':tied?'#fff':'#555';
+    const t2Color=clinched2?'#FFC72C':clinched1?'#555':t2Leads?'#FFC72C':tied?'#fff':'#555';
+    const t1Shadow=t1Leads||clinched1?'1px 1px 0 #8A6200':'none';
+    const t2Shadow=t2Leads||clinched2?'1px 1px 0 #8A6200':'none';
+    const t1Opacity=clinched2?0.3:t2Leads?0.3:1;
+    const t2Opacity=clinched1?0.3:t1Leads?0.3:1;
     const cardBg=clinched?'#0d1a2e':'#0a0a0a';
     const cardBorder=clinched?'#b8860b':'#1a1a1a';
     const BASE=`https://rarel12.github.io/nba2026challenge/logos/`;
