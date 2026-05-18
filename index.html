@@ -178,19 +178,18 @@ body{background:#000;min-height:100vh}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
 .bracket-conf-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid}
 .bracket-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-.bracket-card{border-radius:5px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;cursor:pointer;min-height:80px;transition:opacity 0.15s}
+.bracket-card{border-radius:5px;padding:12px 10px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;cursor:pointer;transition:opacity 0.15s}
 .bracket-card:active{opacity:0.7}
-.bracket-bg-logo-left{position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:80px;height:80px;object-fit:contain;opacity:0.12;pointer-events:none;mix-blend-mode:screen}
-.bracket-bg-logo-right{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:80px;height:80px;object-fit:contain;opacity:0.12;pointer-events:none;mix-blend-mode:screen}
-.bracket-team-side{display:flex;align-items:center;gap:4px;z-index:1}
-.bracket-seed{font-size:8px;color:#555;letter-spacing:1px;font-family:'Courier New',monospace}
-.bracket-team{font-size:13px;font-weight:900;letter-spacing:1px;text-shadow:2px 2px 0 rgba(0,0,0,0.8)}
-.bracket-middle{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;z-index:1}
-.bracket-score-row{display:flex;align-items:center;gap:10px}
-.bracket-win-num{font-size:26px;font-weight:900;font-family:'Courier New',monospace}
-.bracket-dash{font-size:16px;color:#333}
-.bracket-series-status{font-size:6px;letter-spacing:2px;color:#555;text-transform:uppercase;font-family:'Courier New',monospace}
-.bracket-clinched-badge{font-size:6px;color:#FFD700;letter-spacing:1px;font-family:'Courier New',monospace}
+.b-team-block{display:flex;flex-direction:column;align-items:center;gap:5px;width:22%}
+.b-logo{width:52px;height:52px;object-fit:contain;display:block}
+.b-name-row{display:flex;align-items:center;gap:3px}
+.b-seed{font-size:7px;color:#555;letter-spacing:1px;font-family:'Courier New',monospace}
+.b-abbr{font-size:10px;font-weight:900;letter-spacing:1px;font-family:'Courier New',monospace}
+.b-middle{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.b-score-row{display:flex;align-items:center;gap:8px}
+.b-win{font-size:28px;font-weight:900;font-family:'Courier New',monospace}
+.b-dash{font-size:16px;color:#333}
+.b-status{font-size:6px;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
 .bracket-seed{font-size:9px;color:#888;font-family:'Courier New',monospace}
 .bracket-team{font-size:13px;font-weight:700}
 .bracket-wins{font-size:14px;font-weight:900;font-family:'Courier New',monospace}
@@ -697,33 +696,43 @@ function renderBracket(games,ssRows){
     const clinched=clinched1||clinched2;
     const winner=clinched1?team1:clinched2?team2:null;
 
-    const t1Color=clinched1?'#FFC72C':clinched2?'#555':t1Leads?'#FFC72C':tied?'#fff':'#555';
-    const t2Color=clinched2?'#FFC72C':clinched1?'#555':t2Leads?'#FFC72C':tied?'#fff':'#555';
-    const t1Shadow=clinched1||t1Leads?'2px 2px 0 #8A6200':'2px 2px 0 rgba(0,0,0,0.8)';
-    const t2Shadow=clinched2||t2Leads?'2px 2px 0 #8A6200':'2px 2px 0 rgba(0,0,0,0.8)';
+    const tied=w1===w2;
+    const t1Leading=w1>w2;
+    const t2Leading=w2>w1;
+    const t1Color=clinched1?'#FFC72C':clinched2?'#555':t1Leading?'#FFC72C':tied?'#fff':'#555';
+    const t2Color=clinched2?'#FFC72C':clinched1?'#555':t2Leading?'#FFC72C':tied?'#fff':'#555';
+    const t1Shadow=t1Leading||clinched1?'1px 1px 0 #8A6200':'none';
+    const t2Shadow=t2Leading||clinched2?'1px 1px 0 #8A6200':'none';
+    const t1Opacity=clinched2?0.3:t2Leading?0.3:1;
+    const t2Opacity=clinched1?0.3:t1Leading?0.3:1;
     const cardBg=clinched?'#0d1a2e':'#0a0a0a';
     const cardBorder=clinched?'#b8860b':'#1a1a1a';
-    const statusText=clinched?'● SERIES CLINCHED':'';
-    const statusClass=clinched?'bracket-clinched-badge':'bracket-series-status';
+    const BASE=`https://rarel12.github.io/nba2026challenge/logos/`;
+    const statusText=clinched?'● SERIES CLINCHED':document.getElementById('round-pill').textContent||'';
+    const statusColor=clinched?'#FFD700':'#555';
 
     const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
-      <img class="bracket-bg-logo-left" src="https://rarel12.github.io/nba2026challenge/logos/${team1.toLowerCase()}.png" alt=""/>
-      <img class="bracket-bg-logo-right" src="https://rarel12.github.io/nba2026challenge/logos/${team2.toLowerCase()}.png" alt=""/>
-      <div class="bracket-team-side">
-        <span class="bracket-seed">${seed1}</span>
-        <span class="bracket-team" style="color:${t1Color};text-shadow:${t1Shadow}">${team1}</span>
-      </div>
-      <div class="bracket-middle">
-        <div class="bracket-score-row">
-          <span class="bracket-win-num" style="color:${t1Color};text-shadow:${t1Shadow}">${w1}</span>
-          <span class="bracket-dash">—</span>
-          <span class="bracket-win-num" style="color:${t2Color};text-shadow:${t2Shadow}">${w2}</span>
+      <div class="b-team-block" style="opacity:${t1Opacity}">
+        <img class="b-logo" src="${BASE}${team1.toLowerCase()}.png" alt="${team1}" onerror="this.style.display='none'"/>
+        <div class="b-name-row">
+          <span class="b-seed">${seed1}</span>
+          <span class="b-abbr" style="color:${t1Color};text-shadow:${t1Shadow}">${team1}</span>
         </div>
-        <div class="${statusClass}">${statusText||document.getElementById('round-pill').textContent}</div>
       </div>
-      <div class="bracket-team-side">
-        <span class="bracket-seed">${seed2}</span>
-        <span class="bracket-team" style="color:${t2Color};text-shadow:${t2Shadow}">${team2}</span>
+      <div class="b-middle">
+        <div class="b-score-row">
+          <span class="b-win" style="color:${t1Color};text-shadow:${t1Shadow}">${w1}</span>
+          <span class="b-dash">—</span>
+          <span class="b-win" style="color:${t2Color};text-shadow:${t2Shadow}">${w2}</span>
+        </div>
+        <div class="b-status" style="color:${statusColor}">${statusText}</div>
+      </div>
+      <div class="b-team-block" style="opacity:${t2Opacity}">
+        <img class="b-logo" src="${BASE}${team2.toLowerCase()}.png" alt="${team2}" onerror="this.style.display='none'"/>
+        <div class="b-name-row">
+          <span class="b-seed">${seed2}</span>
+          <span class="b-abbr" style="color:${t2Color};text-shadow:${t2Shadow}">${team2}</span>
+        </div>
       </div>
     </div>`;
     if(isEast)eastHTML+=card;else westHTML+=card;
