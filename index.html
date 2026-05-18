@@ -837,11 +837,6 @@ function renderLeaders(rows){
   }
   const BASE_URL='https://rarel12.github.io/nba2026challenge/';
   // Assign ranks with tie detection
-  const ranks=top4.map((p,i)=>{
-    if(i===0) return 1;
-    return top4[i].total===top4[i-1].total ? ranks[i-1] : i+1;
-  });
-  // Fix forward reference — recompute properly
   const assignedRanks=[];
   top4.forEach((p,i)=>{
     if(i===0){assignedRanks.push(1);return;}
