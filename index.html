@@ -309,7 +309,6 @@ body{background:#000;min-height:100vh}
       <button class="tab-btn active" onclick="showTab('leaderboard',this)">Standings</button>
       <button class="tab-btn" onclick="showTab('stats',this)">Stats</button>
       <button class="tab-btn" onclick="showTab('gamelog',this)">Game Log</button>
-      <button class="tab-btn" onclick="showTab('matchups',this)">Today</button>
       <button class="tab-btn" onclick="showTab('leaders',this)">Leaders</button>
     </div>
   </div>
@@ -376,6 +375,10 @@ body{background:#000;min-height:100vh}
       <div class="battle-series-teams" id="battle-teams"></div>
       <div class="battle-series-record" id="battle-record"></div>
     </div>
+    <div class="status-bar" style="margin:10px 16px 0">
+      <div class="status-text" id="battle-status">Loading...</div>
+      <div class="tm-refresh"><div class="tm-live-dot"></div>LIVE · 60s</div>
+    </div>
     <div class="battle-game-tabs" id="battle-game-tabs"></div>
     <div id="battle-content"></div>
     <div class="tab-footer">
@@ -441,6 +444,7 @@ let glData=[];
 let playerStatus={};
 let playerStar={};
 let matchupsInterval=null;
+let battleRefreshInterval=null;
 
 function splitCSVLine(line){
   const r=[];let c='';let q=false;
@@ -1071,6 +1075,15 @@ document.addEventListener('touchend',e=>{
     document.getElementById('tm-status').textContent='Refreshing...';
     loadMatchups();
   }
+  const battleSection=document.getElementById('battle');
+  if(diff>80&&battleSection&&battleSection.classList.contains('active')){
+    const todayActive=document.querySelector('.battle-game-tab.active');
+    if(todayActive&&todayActive.textContent==='TODAY'){
+      document.getElementById('battle-status').textContent='Refreshing...';
+      const {team1,team2,seed1,seed2}=battleState;
+      loadMatchups().then(()=>renderBattleLive(team1,team2,seed1,seed2));
+    }
+  }
 },{passive:true});
 
 document.addEventListener('visibilitychange',()=>{
@@ -1078,6 +1091,14 @@ document.addEventListener('visibilitychange',()=>{
     const tmSection=document.getElementById('matchups');
     if(tmSection&&tmSection.classList.contains('active')){
       loadMatchups();
+    }
+    const battleSection=document.getElementById('battle');
+    if(battleSection&&battleSection.classList.contains('active')){
+      const todayActive=document.querySelector('.battle-game-tab.active');
+      if(todayActive&&todayActive.textContent==='TODAY'){
+        const {team1,team2,seed1,seed2}=battleState;
+        loadMatchups().then(()=>renderBattleLive(team1,team2,seed1,seed2));
+      }
     }
   }
 });
@@ -1097,20 +1118,28 @@ function openBattle(team1,team2,seed1,seed2,w1,w2){
   const record=w1n===0&&w2n===0?'SERIES 0-0':w1n>w2n?team1+' LEADS '+w1n+'-'+w2n:w2n>w1n?team2+' LEADS '+w2n+'-'+w1n:'TIED '+w1n+'-'+w2n;
   document.getElementById('battle-record').textContent=record;
 
-  // Swap chrome: hide app-bar+tab-bar, show battle-chrome
   document.getElementById('app-chrome').style.display='none';
   document.getElementById('battle-chrome').style.display='block';
 
   const seriesGames=getBattleGames(team1,team2);
-  const totalGames=Math.max(w1n+w2n,1);
-  renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2);
+  renderBattleTabs(seriesGames,Math.max(w1n+w2n,1),team1,team2,seed1,seed2);
 
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('battle').classList.add('active');
+
+  if(battleRefreshInterval)clearInterval(battleRefreshInterval);
+  battleRefreshInterval=setInterval(()=>{
+    const todayActive=document.querySelector('.battle-game-tab.active');
+    if(todayActive&&todayActive.textContent==='TODAY'){
+      const {team1:t1,team2:t2,seed1:s1,seed2:s2}=battleState;
+      loadMatchups().then(()=>renderBattleLive(t1,t2,s1,s2));
+    }
+  },60000);
 }
 
 function closeBattle(){
-  // Restore chrome
+  if(battleRefreshInterval)clearInterval(battleRefreshInterval);
+  battleRefreshInterval=null;
   document.getElementById('app-chrome').style.display='block';
   document.getElementById('battle-chrome').style.display='none';
 
@@ -1184,29 +1213,140 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
   const tabs=document.getElementById('battle-game-tabs');
   tabs.innerHTML='';
 
-  if(playedGames.length===0){
-    const btn=document.createElement('button');
-    btn.className='battle-game-tab active';
-    btn.textContent='GAME 1';
-    tabs.appendChild(btn);
-    renderBattleGame(null,team1,team2,seed1,seed2,'upcoming');
-    return;
-  }
+  // TODAY always first
+  const todayBtn=document.createElement('button');
+  todayBtn.className='battle-game-tab active';
+  todayBtn.textContent='TODAY';
+  todayBtn.onclick=()=>{
+    document.querySelectorAll('.battle-game-tab').forEach(b=>b.classList.remove('active'));
+    todayBtn.classList.add('active');
+    renderBattleLive(team1,team2,seed1,seed2);
+  };
+  tabs.appendChild(todayBtn);
 
-  playedGames.forEach((gNum,i)=>{
+  // Historical game tabs
+  playedGames.forEach(gNum=>{
     const btn=document.createElement('button');
-    btn.className='battle-game-tab'+(i===playedGames.length-1?' active':'');
+    btn.className='battle-game-tab';
     btn.textContent='GAME '+gNum;
     btn.onclick=()=>{
       document.querySelectorAll('.battle-game-tab').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
+      if(battleRefreshInterval)clearInterval(battleRefreshInterval);
       renderBattleGame(seriesGames[gNum],team1,team2,seed1,seed2,'final');
     };
     tabs.appendChild(btn);
   });
 
-  const lastGame=playedGames[playedGames.length-1];
-  renderBattleGame(seriesGames[lastGame],team1,team2,seed1,seed2,'final');
+  // Default: show TODAY
+  renderBattleLive(team1,team2,seed1,seed2);
+}
+
+function renderBattleLive(team1,team2,seed1,seed2){
+  let liveGame=null;
+  if(lastGoodGames&&lastGoodGames.games){
+    liveGame=lastGoodGames.games.find(g=>
+      (g.homeTeam===team1&&g.awayTeam===team2)||
+      (g.homeTeam===team2&&g.awayTeam===team1)
+    );
+  }
+
+  const statusEl=document.getElementById('battle-status');
+  let scoreCenterHTML='<div class="battle-vs-text">VS</div>';
+  let displayStatusClass='upcoming';
+  let displayStatusText='UPCOMING';
+
+  if(liveGame){
+    const t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
+    const t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
+    if(liveGame.statusState==='in'){
+      displayStatusClass='live';displayStatusText='● LIVE';
+      scoreCenterHTML=`<div style="font-size:22px;font-weight:900;font-family:'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">${t1Score} — ${t2Score}</div>`+
+        `<div style="font-size:8px;color:#22c55e;letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px">Q${liveGame.period} ${liveGame.clock}</div>`;
+      if(statusEl)statusEl.textContent='Updated: '+new Date().toLocaleTimeString();
+    } else if(liveGame.statusState==='post'){
+      displayStatusClass='final';displayStatusText='FINAL';
+      scoreCenterHTML=`<div style="font-size:22px;font-weight:900;font-family:'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">${t1Score} — ${t2Score}</div>`;
+      if(statusEl)statusEl.textContent='Final score — cached until 5am';
+    } else if(liveGame.statusState==='pre'){
+      displayStatusClass='upcoming';displayStatusText='UPCOMING';
+      let tipDisplay='';
+      try{const d=new Date(liveGame.date);tipDisplay=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});}catch(e){}
+      scoreCenterHTML=`<div style="font-size:11px;color:#1E90FF;font-family:'Courier New',monospace;letter-spacing:1px">${tipDisplay}</div>`;
+      if(statusEl)statusEl.textContent='Updated: '+new Date().toLocaleTimeString();
+    }
+  } else {
+    scoreCenterHTML='<div style="font-size:9px;color:#444;letter-spacing:1px;font-family:'Courier New',monospace">NO GAME TODAY</div>';
+    if(statusEl)statusEl.textContent='No game scheduled today';
+  }
+
+  const arenaHTML=`<div class="battle-arena">
+    <div class="battle-team-block">
+      <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team1.toLowerCase()}.png" alt="${team1}"/></div>
+      <div class="battle-team-nameline">
+        <span class="battle-team-seed-inline">${seed1}</span>
+        <span class="battle-team-name">${team1}</span>
+      </div>
+    </div>
+    <div class="battle-vs-block">${scoreCenterHTML}<div class="battle-status ${displayStatusClass}">${displayStatusText}</div></div>
+    <div class="battle-team-block">
+      <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team2.toLowerCase()}.png" alt="${team2}"/></div>
+      <div class="battle-team-nameline">
+        <span class="battle-team-seed-inline">${seed2}</span>
+        <span class="battle-team-name">${team2}</span>
+      </div>
+    </div>
+  </div>`;
+
+  const buildLivePanel=(teamAbbr)=>{
+    // Determine player source
+    let players=[];
+    const isLiveOrFinal=liveGame&&(liveGame.statusState==='in'||liveGame.statusState==='post');
+    if(isLiveOrFinal&&liveGame.players&&liveGame.players.length){
+      players=liveGame.players.filter(p=>p.team===teamAbbr);
+    } else {
+      // Pre-game or no game — show tracked roster
+      players=TRACKED.filter(p=>p.team===teamAbbr);
+    }
+    if(!players.length) return `<div class="battle-no-players">NO TRACKED<br>PLAYERS</div>`;
+
+    return players.map(p=>{
+      const color=OWNER_COLORS[p.owner]||'#888';
+      const isStar=(playerStar[p.name]==='Yes')||(p.star||false);
+      const isInjured=(playerStatus[p.name]||'').trim()==='Injured';
+      const starHTML=isStar?`<span style="color:#FFC72C;font-size:11px;margin-left:3px">★</span>`:'';
+      const injuryHTML=isInjured?`<span style="margin-left:3px">🩹</span>`:'';
+
+      let statsHTML='<span class="tm-stat" style="color:#333">—</span>';
+      let totalVal=0;
+      if(isLiveOrFinal){
+        totalVal=p.total||0;
+        if(isStar){
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS </span>`+
+            `<span class="tm-stat-val">${p.reb}</span><span class="tm-stat"> REB </span>`+
+            `<span class="tm-stat-val">${p.ast}</span><span class="tm-stat"> AST</span>`;
+        } else {
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+        }
+      }
+
+      return `<div class="tm-player-row">
+        <div class="tm-player-left"><div>
+          <div class="tm-owner-label" style="color:${color}">${p.owner}</div>
+          <div class="tm-player-name">${p.name}${starHTML}${injuryHTML}</div>
+        </div></div>
+        <div class="tm-player-stats">
+          ${statsHTML}
+          ${isLiveOrFinal?`<span class="tm-total" style="color:${color}">${Math.round(totalVal)||0}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  document.getElementById('battle-content').innerHTML=arenaHTML+`<div class="battle-split-stats">
+    <div class="battle-stat-panel"><div class="battle-stat-panel-title">${team1}</div>${buildLivePanel(team1)}</div>
+    <div class="battle-stat-panel"><div class="battle-stat-panel-title">${team2}</div>${buildLivePanel(team2)}</div>
+  </div>`;
 }
 
 function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
@@ -1267,7 +1407,6 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
   </div>`;
 
   const buildPanel=(glPlayers,teamAbbr)=>{
-    // Use live ESPN data if available, otherwise fall back to game log data
     let players=glPlayers;
     if(hasLive){
       players=liveGame.players.filter(p=>p.team===teamAbbr);
@@ -1276,7 +1415,8 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
 
     return players.map(p=>{
       const color=OWNER_COLORS[p.owner]||'#888';
-      const isStar=hasLive?(p.star||false):(playerStar[p.name]==='Yes');
+      // Use sheet-based star lookup always — p.star from ESPN may be stale
+      const isStar=(playerStar[p.name]==='Yes')||(p.star||false);
       const isInjured=(playerStatus[p.name]||'').trim()==='Injured';
       const starHTML=isStar?`<span style="color:#FFC72C;font-size:11px;margin-left:3px">★</span>`:'';
       const injuryHTML=isInjured?`<span style="margin-left:3px">🩹</span>`:'';
@@ -1293,8 +1433,15 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
           statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
         }
       } else if(!isUpcoming){
+        // Game log fallback — stars: show reb+ast if available
         totalVal=p.total||p.pts||0;
-        statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+        if(isStar&&(p.reb>0||p.ast>0)){
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS </span>`+
+            `<span class="tm-stat-val">${p.reb}</span><span class="tm-stat"> REB </span>`+
+            `<span class="tm-stat-val">${p.ast}</span><span class="tm-stat"> AST</span>`;
+        } else {
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+        }
       } else {
         statsHTML=`<span class="tm-stat" style="color:#333">—</span>`;
       }
@@ -1332,10 +1479,6 @@ function showTab(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');btn.classList.add('active');
-  if(id==='matchups'){
-    if(matchupsInterval)clearInterval(matchupsInterval);
-    loadMatchups();
-  }
   if(id==='leaders'&&document.getElementById('leaders-rows').innerHTML===''){
     loadData();
   }
