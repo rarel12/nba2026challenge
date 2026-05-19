@@ -862,53 +862,133 @@ function renderLeaders(rows){
     document.getElementById('leaders-rows').innerHTML='<div class="empty-state">Stats populate after first game</div>';
     return;
   }
-  const totals=[];
+
+  // Build full player list — include all players even with 0 total
+  const allPlayers=[];
   rows.forEach(r=>{
     const name=(r['Player Name']||'').trim();
     const owner=(r['Owner']||'').trim();
     const total=parseFloat((r['Grand Total']||'0').replace(/,/g,''));
-    if(name&&owner&&total>0) totals.push({name,owner,total});
+    const pts=parseInt(r['Total Pts']||0);
+    const reb=parseInt(r['Total Reb']||0);
+    const ast=parseInt(r['Total Ast']||0);
+    const bon=parseInt(r['Series Bonus']||0);
+    const gp=parseInt(r['Games Played']||0);
+    const isElim=(playerStatus[name]||'').trim()==='Eliminated';
+    const isInjured=(playerStatus[name]||'').trim()==='Injured';
+    const isStar=(playerStar[name]||'')==='Yes';
+    if(name&&owner) allPlayers.push({name,owner,total,pts,reb,ast,bon,gp,isElim,isInjured,isStar});
   });
-  totals.sort((a,b)=>b.total-a.total);
-  const top4=totals.slice(0,4);
-  if(!top4.length){
+
+  allPlayers.sort((a,b)=>b.total-a.total);
+
+  if(!allPlayers.length){
     document.getElementById('leaders-rows').innerHTML='<div class="empty-state">No data yet</div>';
     return;
   }
-  const BASE_URL='https://rarel12.github.io/nba2026challenge/';
-  const assignedRanks=[];
-  top4.forEach((p,i)=>{
-    if(i===0){assignedRanks.push(1);return;}
-    assignedRanks.push(p.total===top4[i-1].total?assignedRanks[i-1]:i+1);
+
+  // Standard competition ranking (1,2,3,3,5,6...)
+  const ranked=[];
+  allPlayers.forEach((p,i)=>{
+    if(i===0){ranked.push(Object.assign({},p,{rank:1}));return;}
+    const rank=p.total===allPlayers[i-1].total?ranked[i-1].rank:i+1;
+    ranked.push(Object.assign({},p,{rank}));
   });
-  document.getElementById('leaders-rows').innerHTML=top4.map((p,i)=>{
-    const rank=assignedRanks[i];
-    const tied=top4.filter(x=>x.total===p.total).length>1;
-    const rankLabel=tied?`T-${rank}`:`${rank}`;
-    const color=OWNER_COLORS[p.owner]||'#888';
-    const shadow=OWNER_SHADOWS[p.owner]||'#000';
-    const rankColor=RANK_COLORS[Math.min(rank-1,3)];
-    const rankShadow=RANK_SHADOWS[Math.min(rank-1,3)];
-    const imgSrc=PLAYER_IMAGES[p.name]?BASE_URL+PLAYER_IMAGES[p.name]:'';
-    const imgHTML=imgSrc
-      ?`<div class="leader-img"><img src="${imgSrc}" alt="${p.name}" onerror="this.parentElement.style.background='rgba(0,0,0,0.3)'"/></div>`
-      :`<div class="leader-img" style="background:rgba(0,0,0,0.2)"></div>`;
-    const cardBorder=rank===1?'#FFD700':rank===2?'#C0C0C0':rank===3?'#CD7F32':'#333';
-    const rankBg=rank===1?'rgba(255,215,0,0.06)':rank===2?'rgba(192,192,192,0.04)':rank===3?'rgba(205,127,50,0.04)':'rgba(0,0,0,0.1)';
-    const rankFontSize=tied?'13px':'18px';
-    return `<div class="leader-card leader-card-${Math.min(i+1,4)}" style="border-color:${cardBorder};background:#000">
-      <div class="leader-rank" style="color:${rankColor};background:${rankBg};text-shadow:2px 2px 0 ${rankShadow};font-size:${rankFontSize}">${rankLabel}</div>
-      <div class="leader-info">
-        <div class="leader-name" style="color:${color};text-shadow:2px 2px 0 ${shadow}">${p.name}</div>
-        <div class="leader-owner" style="color:${color}">${p.owner}</div>
-        <div class="leader-pts-row">
-          <span class="leader-pts-num" style="color:${color};text-shadow:2px 2px 0 ${shadow},0 0 10px ${color}88">${Math.round(p.total)}</span>
-          <span class="leader-pts-label">PTS</span>
-        </div>
-      </div>
-      ${imgHTML}
-    </div>`;
+
+  const top4=ranked.slice(0,4);
+  const rest=ranked.slice(4);
+  const BASE_URL='https://rarel12.github.io/nba2026challenge/';
+  const RANK_BORDERS=['#FFD700','#C0C0C0','#CD7F32','#CD7F32'];
+  const RANK_BGS=['rgba(255,215,0,0.06)','rgba(192,192,192,0.04)','rgba(205,127,50,0.04)','rgba(205,127,50,0.04)'];
+
+  // Top 4 cards with full stat breakdown
+  var top4HTML=top4.map(function(p,i){
+    var tied=ranked.filter(function(x){return x.total===p.total;}).length>1;
+    var rankLabel=tied?'T-'+p.rank:''+p.rank;
+    var color=OWNER_COLORS[p.owner]||'#888';
+    var shadow=OWNER_SHADOWS[p.owner]||'#000';
+    var rankColor=RANK_COLORS[Math.min(p.rank-1,3)];
+    var rankShadow=RANK_SHADOWS[Math.min(p.rank-1,3)];
+    var imgSrc=PLAYER_IMAGES[p.name]?BASE_URL+PLAYER_IMAGES[p.name]:'';
+    var imgHTML=imgSrc
+      ?'<div class="leader-img"><img src="'+imgSrc+'" alt="'+p.name+'" onerror="this.parentElement.style.background=\'rgba(0,0,0,0.3)\'"/></div>'
+      :'<div class="leader-img" style="background:rgba(0,0,0,0.2)"></div>';
+    var cardBorder=RANK_BORDERS[Math.min(p.rank-1,3)];
+    var rankBg=RANK_BGS[Math.min(p.rank-1,3)];
+    var rankFontSize=tied?'13px':'18px';
+    var showReb=p.isStar||(p.reb>0||p.ast>0);
+    var rebVal=showReb?p.reb:'—';
+    var astVal=showReb?p.ast:'—';
+    var bonVal=p.bon>0?p.bon:'—';
+    var bonColor=p.bon>0?'#FFC72C':'#2a2a2a';
+    var gpVal=p.gp>0?p.gp+'G':'—';
+    return '<div class="leader-card leader-card-'+Math.min(i+1,4)+'" style="border-color:'+cardBorder+';background:#000">'
+      +'<div class="leader-rank" style="color:'+rankColor+';background:'+rankBg+';text-shadow:2px 2px 0 '+rankShadow+';font-size:'+rankFontSize+'">'+rankLabel+'</div>'
+      +'<div class="leader-info">'
+      +'<div class="leader-name" style="color:'+color+';text-shadow:2px 2px 0 '+shadow+'">'+p.name+'</div>'
+      +'<div class="leader-owner" style="color:'+color+'">'+p.owner+'</div>'
+      +'<div class="leader-pts-row">'
+      +'<span class="leader-pts-num" style="color:'+color+';text-shadow:2px 2px 0 '+shadow+',0 0 10px '+color+'88">'+Math.round(p.total)+'</span>'
+      +'<span class="leader-pts-label">PTS</span>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:5px;padding-top:5px;border-top:1px solid #1a1a1a">'
+      +'<div style="text-align:center"><div style="font-size:7px;color:#444;letter-spacing:1px">PTS</div><div style="font-size:11px;font-weight:900;font-family:\'Courier New\',monospace;color:#ccc">'+p.pts+'</div></div>'
+      +'<div style="text-align:center"><div style="font-size:7px;color:#444;letter-spacing:1px">REB</div><div style="font-size:11px;font-weight:900;font-family:\'Courier New\',monospace;color:#ccc">'+rebVal+'</div></div>'
+      +'<div style="text-align:center"><div style="font-size:7px;color:#444;letter-spacing:1px">AST</div><div style="font-size:11px;font-weight:900;font-family:\'Courier New\',monospace;color:#ccc">'+astVal+'</div></div>'
+      +'<div style="text-align:center"><div style="font-size:7px;color:#FFC72C;letter-spacing:1px">BON</div><div style="font-size:11px;font-weight:900;font-family:\'Courier New\',monospace;color:'+bonColor+'">'+bonVal+'</div></div>'
+      +'<div style="text-align:center"><div style="font-size:7px;color:#444;letter-spacing:1px">GP</div><div style="font-size:11px;font-weight:900;font-family:\'Courier New\',monospace;color:#ccc">'+gpVal+'</div></div>'
+      +'</div>'
+      +'</div>'
+      +imgHTML
+      +'</div>';
   }).join('');
+
+  // Compact rows for rank 5+
+  var colHdr='<div style="display:flex;align-items:center;padding:4px 10px;background:#0d0d0d;border-bottom:1px solid #1a1a1a">'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;width:32px;font-family:\'Courier New\',monospace">RK</span>'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;flex:1">PLAYER</span>'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;width:30px;text-align:center">PTS</span>'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;width:30px;text-align:center">REB</span>'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;width:30px;text-align:center">AST</span>'
+    +'<span style="font-size:8px;color:#FFC72C;letter-spacing:1px;width:30px;text-align:center">BON</span>'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;width:28px;text-align:center">GP</span>'
+    +'<span style="font-size:8px;color:#444;letter-spacing:1px;width:40px;text-align:right">TOT</span>'
+    +'</div>';
+
+  var restRows=rest.map(function(p){
+    var tied=ranked.filter(function(x){return x.total===p.total;}).length>1;
+    var rankLabel=tied?'T-'+p.rank:''+p.rank;
+    var color=OWNER_COLORS[p.owner]||'#888';
+    var rankColor=p.rank===1?'#FFD700':p.rank===2?'#C0C0C0':p.rank<=4?'#CD7F32':'#555';
+    var rowOpacity=(p.isElim||p.total===0)?'opacity:0.3;':'';
+    var elimHTML=p.isElim?' 💀':'';
+    var injHTML=p.isInjured?' 🩹':'';
+    var showReb=p.isStar||(p.reb>0||p.ast>0);
+    var rebVal=showReb?p.reb:'—';
+    var astVal=showReb?p.ast:'—';
+    var bonVal=p.bon>0?''+p.bon:'—';
+    var bonColor=p.bon>0?'#FFC72C':'#2a2a2a';
+    var gpVal=p.gp>0?p.gp+'G':'—';
+    return '<div style="display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid #1a1a1a;'+rowOpacity+'">'
+      +'<span style="font-size:10px;font-weight:900;color:'+rankColor+';font-family:\'Courier New\',monospace;width:32px">'+rankLabel+'</span>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:11px;color:#ddd;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+elimHTML+injHTML+'</div>'
+      +'<div style="font-size:8px;color:'+color+';letter-spacing:1px">'+p.owner+'</div>'
+      +'</div>'
+      +'<span style="font-size:11px;font-weight:700;color:#ccc;font-family:\'Courier New\',monospace;width:30px;text-align:center">'+p.pts+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:#ccc;font-family:\'Courier New\',monospace;width:30px;text-align:center">'+rebVal+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:#ccc;font-family:\'Courier New\',monospace;width:30px;text-align:center">'+astVal+'</span>'
+      +'<span style="font-size:11px;font-weight:700;font-family:\'Courier New\',monospace;width:30px;text-align:center;color:'+bonColor+'">'+bonVal+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:#555;font-family:\'Courier New\',monospace;width:28px;text-align:center">'+gpVal+'</span>'
+      +'<span style="font-size:13px;font-weight:900;color:'+color+';font-family:\'Courier New\',monospace;width:40px;text-align:right">'+Math.round(p.total)+'</span>'
+      +'</div>';
+  }).join('');
+
+  var restHTML=rest.length
+    ?'<div style="background:#111;border:1px solid #222;border-radius:4px;overflow:hidden;margin-top:8px">'+colHdr+restRows+'</div>'
+    :'';
+
+  document.getElementById('leaders-rows').innerHTML=top4HTML+restHTML;
 }
 
 function renderStats(rows){
