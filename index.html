@@ -1228,20 +1228,19 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
 }
 
 function renderBattleLive(team1,team2,seed1,seed2){
-  let liveGame=null;
+  var liveGame=null;
   if(lastGoodGames&&lastGoodGames.games){
-    liveGame=lastGoodGames.games.find(g=>
-      (g.homeTeam===team1&&g.awayTeam===team2)||
-      (g.homeTeam===team2&&g.awayTeam===team1)
-    );
+    liveGame=lastGoodGames.games.find(function(g){
+      return (g.homeTeam===team1&&g.awayTeam===team2)||(g.homeTeam===team2&&g.awayTeam===team1);
+    });
   }
-  const statusEl=document.getElementById('battle-status');
-  let scoreCenterHTML='<div class="battle-vs-text">VS</div>';
-  let displayStatusClass='upcoming';
-  let displayStatusText='UPCOMING';
+  var statusEl=document.getElementById('battle-status');
+  var scoreCenterHTML='<div class="battle-vs-text">VS</div>';
+  var displayStatusClass='upcoming';
+  var displayStatusText='UPCOMING';
   if(liveGame){
-    const t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
-    const t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
+    var t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
+    var t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
     if(liveGame.statusState==='in'){
       displayStatusClass='live';displayStatusText='● LIVE';
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+t1Score+' — '+t2Score+'</div>'
@@ -1253,8 +1252,8 @@ function renderBattleLive(team1,team2,seed1,seed2){
       if(statusEl)statusEl.textContent='Final score — cached until 5am';
     } else if(liveGame.statusState==='pre'){
       displayStatusClass='upcoming';displayStatusText='UPCOMING';
-      let tipDisplay='';
-      try{const d=new Date(liveGame.date);tipDisplay=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});}catch(e){}
+      var tipDisplay='';
+      try{var d=new Date(liveGame.date);tipDisplay=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});}catch(ex){}
       scoreCenterHTML='<div style="font-size:11px;color:#1E90FF;letter-spacing:1px">'+tipDisplay+'</div>';
       if(statusEl)statusEl.textContent='Updated: '+new Date().toLocaleTimeString();
     }
@@ -1262,8 +1261,8 @@ function renderBattleLive(team1,team2,seed1,seed2){
     scoreCenterHTML='<div style="font-size:9px;color:#444;letter-spacing:1px">NO GAME TODAY</div>';
     if(statusEl)statusEl.textContent='No game scheduled today';
   }
-  const BASE='https://rarel12.github.io/nba2026challenge/logos/';
-  const arenaHTML='<div class="battle-arena">'
+  var BASE='https://rarel12.github.io/nba2026challenge/logos/';
+  var arenaHTML='<div class="battle-arena">'
     +'<div class="battle-team-block">'
     +'<div class="battle-team-logo"><img src="'+BASE+team1.toLowerCase()+'.png" alt="'+team1+'"/></div>'
     +'<div class="battle-team-nameline"><span class="battle-team-seed-inline">'+seed1+'</span><span class="battle-team-name">'+team1+'</span></div>'
@@ -1273,10 +1272,9 @@ function renderBattleLive(team1,team2,seed1,seed2){
     +'<div class="battle-team-logo"><img src="'+BASE+team2.toLowerCase()+'.png" alt="'+team2+'"/></div>'
     +'<div class="battle-team-nameline"><span class="battle-team-seed-inline">'+seed2+'</span><span class="battle-team-name">'+team2+'</span></div>'
     +'</div></div>';
-
-  const isLiveOrFinal=liveGame&&(liveGame.statusState==='in'||liveGame.statusState==='post');
-  const buildLivePanel=function(teamAbbr){
-    let players=[];
+  var isLiveOrFinal=liveGame&&(liveGame.statusState==='in'||liveGame.statusState==='post');
+  var buildLivePanel=function(teamAbbr){
+    var players=[];
     if(isLiveOrFinal&&liveGame.players&&liveGame.players.length){
       players=liveGame.players.filter(function(p){return p.team===teamAbbr;});
     } else {
@@ -1284,13 +1282,13 @@ function renderBattleLive(team1,team2,seed1,seed2){
     }
     if(!players.length) return '<div class="battle-no-players">NO TRACKED<br>PLAYERS</div>';
     return players.map(function(p){
-      const color=OWNER_COLORS[p.owner]||'#888';
-      const isStar=(playerStar[p.name]==='Yes')||(p.star||false);
-      const isInjured=(playerStatus[p.name]||'').trim()==='Injured';
-      const starHTML=isStar?'<span style="color:#FFC72C;font-size:11px;margin-left:3px">★</span>':'';
-      const injuryHTML=isInjured?'<span style="margin-left:3px">🩹</span>':'';
-      let statsHTML='<span class="tm-stat" style="color:#333">—</span>';
-      let totalVal=0;
+      var color=OWNER_COLORS[p.owner]||'#888';
+      var isStar=(playerStar[p.name]==='Yes')||(p.star||false);
+      var isInjured=(playerStatus[p.name]||'').trim()==='Injured';
+      var starHTML=isStar?'<span style="color:#FFC72C;font-size:11px;margin-left:3px">★</span>':'';
+      var injuryHTML=isInjured?'<span style="margin-left:3px">🩹</span>':'';
+      var statsHTML='<span class="tm-stat" style="color:#333">—</span>';
+      var totalVal=0;
       if(isLiveOrFinal){
         totalVal=p.total||0;
         if(isStar){
@@ -1301,7 +1299,7 @@ function renderBattleLive(team1,team2,seed1,seed2){
           statsHTML='<span class="tm-stat-val">'+p.pts+'</span><span class="tm-stat"> PTS</span>';
         }
       }
-      const totalHTML=isLiveOrFinal?'<span class="tm-total" style="color:'+color+'">'+Math.round(totalVal)+'</span>':'';
+      var totalHTML=isLiveOrFinal?'<span class="tm-total" style="color:'+color+'">'+Math.round(totalVal)+'</span>':'';
       return '<div class="tm-player-row">'
         +'<div class="tm-player-left"><div>'
         +'<div class="tm-owner-label" style="color:'+color+'">'+p.owner+'</div>'
@@ -1311,11 +1309,11 @@ function renderBattleLive(team1,team2,seed1,seed2){
         +'</div>';
     }).join('');
   };
-  const statsHTML='<div class="battle-split-stats">'
+  document.getElementById('battle-content').innerHTML=arenaHTML
+    +'<div class="battle-split-stats">'
     +'<div class="battle-stat-panel"><div class="battle-stat-panel-title">'+team1+'</div>'+buildLivePanel(team1)+'</div>'
     +'<div class="battle-stat-panel"><div class="battle-stat-panel-title">'+team2+'</div>'+buildLivePanel(team2)+'</div>'
     +'</div>';
-  document.getElementById('battle-content').innerHTML=arenaHTML+statsHTML;
 }
 
 function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
@@ -1403,7 +1401,13 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
         }
       } else if(!isUpcoming){
         totalVal=p.total||p.pts||0;
-        statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+        if(isStar){
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS </span>`+
+            `<span class="tm-stat-val">${p.reb}</span><span class="tm-stat"> REB </span>`+
+            `<span class="tm-stat-val">${p.ast}</span><span class="tm-stat"> AST</span>`;
+        } else {
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+        }
       } else {
         statsHTML=`<span class="tm-stat" style="color:#333">—</span>`;
       }
