@@ -1211,11 +1211,39 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
 
 function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
   const isUpcoming=status==='upcoming'||!gameData;
-  const t1Players=gameData?gameData.t1:[];
-  const t2Players=gameData?gameData.t2:[];
+  const t1PlayersGL=gameData?gameData.t1:[];
+  const t2PlayersGL=gameData?gameData.t2:[];
 
-  const statusClass=isUpcoming?'upcoming':status==='live'?'live':'final';
-  const statusText=isUpcoming?'UPCOMING':status==='live'?'● LIVE':'FINAL';
+  // Check lastGoodGames for a live/recent game matching this series
+  let liveGame=null;
+  if(lastGoodGames&&lastGoodGames.games){
+    liveGame=lastGoodGames.games.find(g=>
+      (g.homeTeam===team1&&g.awayTeam===team2)||
+      (g.homeTeam===team2&&g.awayTeam===team1)
+    );
+  }
+  const hasLive=liveGame&&liveGame.players&&liveGame.players.length>0&&
+    (liveGame.statusState==='in'||liveGame.statusState==='post');
+
+  // Status display
+  let displayStatusClass=isUpcoming?'upcoming':'final';
+  let displayStatusText=isUpcoming?'UPCOMING':'FINAL';
+  if(liveGame){
+    if(liveGame.statusState==='in'){displayStatusClass='live';displayStatusText='● LIVE';}
+    else if(liveGame.statusState==='post'){displayStatusClass='final';displayStatusText='FINAL';}
+    else if(liveGame.statusState==='pre'){displayStatusClass='upcoming';displayStatusText='UPCOMING';}
+  }
+
+  // Live score block
+  let scoreCenterHTML=`<div class="battle-vs-text">VS</div>`;
+  if(liveGame&&liveGame.statusState!=='pre'){
+    const t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
+    const t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
+    scoreCenterHTML=`<div style="font-size:22px;font-weight:900;font-family:'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">${t1Score} — ${t2Score}</div>`;
+    if(liveGame.statusState==='in'){
+      scoreCenterHTML+=`<div style="font-size:8px;color:#22c55e;letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px">Q${liveGame.period} ${liveGame.clock}</div>`;
+    }
+  }
 
   const arenaHTML=`<div class="battle-arena">
     <div class="battle-team-block">
@@ -1224,11 +1252,10 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
         <span class="battle-team-seed-inline">${seed1}</span>
         <span class="battle-team-name">${team1}</span>
       </div>
-      ${!isUpcoming?`<div class="battle-team-score" style="color:#fff;text-shadow:2px 2px 0 #000">—</div><div class="battle-score-label">PTS</div>`:''}
     </div>
     <div class="battle-vs-block">
-      <div class="battle-vs-text">VS</div>
-      <div class="battle-status ${statusClass}">${statusText}</div>
+      ${scoreCenterHTML}
+      <div class="battle-status ${displayStatusClass}">${displayStatusText}</div>
     </div>
     <div class="battle-team-block">
       <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team2.toLowerCase()}.png" alt="${team2}"/></div>
@@ -1236,39 +1263,65 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status){
         <span class="battle-team-seed-inline">${seed2}</span>
         <span class="battle-team-name">${team2}</span>
       </div>
-      ${!isUpcoming?`<div class="battle-team-score" style="color:#fff;text-shadow:2px 2px 0 #000">—</div><div class="battle-score-label">PTS</div>`:''}
     </div>
   </div>`;
 
-  const buildPanel=(players,teamName,teamColor,side)=>{
+  const buildPanel=(glPlayers,teamAbbr)=>{
+    // Use live ESPN data if available, otherwise fall back to game log data
+    let players=glPlayers;
+    if(hasLive){
+      players=liveGame.players.filter(p=>p.team===teamAbbr);
+    }
     if(!players.length) return `<div class="battle-no-players">NO TRACKED<br>PLAYERS</div>`;
+
     return players.map(p=>{
       const color=OWNER_COLORS[p.owner]||'#888';
-      const shadow=OWNER_SHADOWS[p.owner]||'#000';
-      const isStar=playerStar[p.name]==='Yes';
-      const statLine=isStar?`${p.reb} REB · ${p.ast} AST`:'';
-      return `<div class="battle-stat-row">
-        <div class="battle-stat-left">
-          <div class="battle-stat-player">${p.name.split(' ').pop()}${isStar?' ★':''}</div>
-          <div class="battle-stat-owner" style="color:${color}">${p.owner}</div>
-          ${statLine?`<div class="battle-stat-line">${statLine}</div>`:''}
+      const isStar=hasLive?(p.star||false):(playerStar[p.name]==='Yes');
+      const isInjured=(playerStatus[p.name]||'').trim()==='Injured';
+      const starHTML=isStar?`<span style="color:#FFC72C;font-size:11px;margin-left:3px">★</span>`:'';
+      const injuryHTML=isInjured?`<span style="margin-left:3px">🩹</span>`:'';
+
+      let statsHTML='';
+      let totalVal=0;
+      if(hasLive){
+        totalVal=p.total||0;
+        if(isStar){
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS </span>`+
+            `<span class="tm-stat-val">${p.reb}</span><span class="tm-stat"> REB </span>`+
+            `<span class="tm-stat-val">${p.ast}</span><span class="tm-stat"> AST</span>`;
+        } else {
+          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+        }
+      } else if(!isUpcoming){
+        totalVal=p.total||p.pts||0;
+        statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
+      } else {
+        statsHTML=`<span class="tm-stat" style="color:#333">—</span>`;
+      }
+
+      return `<div class="tm-player-row">
+        <div class="tm-player-left">
+          <div>
+            <div class="tm-owner-label" style="color:${color}">${p.owner}</div>
+            <div class="tm-player-name">${p.name}${starHTML}${injuryHTML}</div>
+          </div>
         </div>
-        <div>
-          <div class="battle-stat-pts" style="color:${color};text-shadow:0 0 8px ${color}88">${isUpcoming?'—':p.pts}</div>
-          <div class="battle-stat-pts-label">PTS</div>
+        <div class="tm-player-stats">
+          ${statsHTML}
+          ${(hasLive||!isUpcoming)?`<span class="tm-total" style="color:${color}">${Math.round(totalVal)||0}</span>`:''}
         </div>
       </div>`;
     }).join('');
   };
 
   const statsHTML=`<div class="battle-split-stats">
-    <div class="battle-stat-panel">
-      <div class="battle-stat-panel-title">${team1}</div>
-      ${buildPanel(t1Players,team1,'#4ab3f4','left')}
+    <div class="battle-stat-panel" style="padding:0;overflow:hidden">
+      <div class="battle-stat-panel-title" style="padding:6px 14px">${team1}</div>
+      ${buildPanel(t1PlayersGL,team1)}
     </div>
-    <div class="battle-stat-panel">
-      <div class="battle-stat-panel-title" style="text-align:right">${team2}</div>
-      ${buildPanel(t2Players,team2,'#63c754','right')}
+    <div class="battle-stat-panel" style="padding:0;overflow:hidden;border-right:none">
+      <div class="battle-stat-panel-title" style="padding:6px 14px;text-align:right">${team2}</div>
+      ${buildPanel(t2PlayersGL,team2)}
     </div>
   </div>`;
 
