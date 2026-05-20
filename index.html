@@ -534,12 +534,13 @@ async function loadData(){
         const gnum=parseInt(r['SeriesGame']||0);
         const homeScore=parseInt(r['HomeScore']||0);
         const awayScore=parseInt(r['AwayScore']||0);
-        // Store by both orientations
         const key1=home+'_'+away+'_'+gnum;
         const key2=away+'_'+home+'_'+gnum;
         gameScores[key1]={homeTeam:home,awayTeam:away,homeScore,awayScore};
         gameScores[key2]={homeTeam:home,awayTeam:away,homeScore,awayScore};
+        console.log('GS stored:',key1,'->',homeScore,'-',awayScore);
       });
+      console.log('gameScores keys:',Object.keys(gameScores));
     }catch(e){console.error('gameScores parse error:',e);}
     const stLines=stT.trim().split('\n');
     let currentRound='1ST ROUND';
@@ -1461,9 +1462,9 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
       scoreCenterHTML+=`<div style="font-size:8px;color:#22c55e;letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px">${periodDisplay(liveGame.period,liveGame.clock)}</div>`;
     }
   } else if(!liveGame&&gameNum){
-    // Try gameScores sheet lookup
     const key1=team1+'_'+team2+'_'+gameNum;
     const key2=team2+'_'+team1+'_'+gameNum;
+    console.log('GS lookup:',key1,'or',key2,'in',Object.keys(gameScores));
     const stored=gameScores[key1]||gameScores[key2]||null;
     if(stored){
       const t1Score=stored.homeTeam===team1?stored.homeScore:stored.awayScore;
