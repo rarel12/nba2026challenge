@@ -538,9 +538,7 @@ async function loadData(){
         const key2=away+'_'+home+'_'+gnum;
         gameScores[key1]={homeTeam:home,awayTeam:away,homeScore,awayScore};
         gameScores[key2]={homeTeam:home,awayTeam:away,homeScore,awayScore};
-        console.log('GS stored:',key1,'->',homeScore,'-',awayScore);
       });
-      console.log('gameScores keys:',Object.keys(gameScores));
     }catch(e){console.error('gameScores parse error:',e);}
     const stLines=stT.trim().split('\n');
     let currentRound='1ST ROUND';
@@ -1320,7 +1318,22 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
     renderBattleLive(team1,team2,seed1,seed2);
   };
   tabs.appendChild(todayBtn);
-  playedGames.forEach(gNum=>{
+  // Also add tabs from gameScores sheet for games not yet in game log
+  const gsGameNums=new Set(playedGames);
+  const t1up=team1.toUpperCase();
+  const t2up=team2.toUpperCase();
+  Object.keys(gameScores).forEach(k=>{
+    const parts=k.split('_');
+    if(parts.length===3){
+      const a=parts[0],b=parts[1],gn=parseInt(parts[2]);
+      if(((a===t1up&&b===t2up)||(a===t2up&&b===t1up))&&!gsGameNums.has(gn)){
+        gsGameNums.add(gn);
+      }
+    }
+  });
+  const allGameNums=Array.from(gsGameNums).sort((a,b)=>a-b);
+
+  allGameNums.forEach(gNum=>{
     const btn=document.createElement('button');
     btn.className='battle-game-tab';
     btn.textContent='GAME '+gNum;
@@ -1328,7 +1341,7 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
       document.querySelectorAll('.battle-game-tab').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       if(battleRefreshInterval)clearInterval(battleRefreshInterval);
-      renderBattleGame(seriesGames[gNum],team1,team2,seed1,seed2,'final',gNum);
+      renderBattleGame(seriesGames[gNum]||null,team1,team2,seed1,seed2,'final',gNum);
     };
     tabs.appendChild(btn);
   });
@@ -1464,7 +1477,6 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
   } else if(!liveGame&&gameNum){
     const key1=team1+'_'+team2+'_'+gameNum;
     const key2=team2+'_'+team1+'_'+gameNum;
-    console.log('GS lookup:',key1,'or',key2,'in',Object.keys(gameScores));
     const stored=gameScores[key1]||gameScores[key2]||null;
     if(stored){
       const t1Score=stored.homeTeam===team1?stored.homeScore:stored.awayScore;
