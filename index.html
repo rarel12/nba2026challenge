@@ -535,8 +535,8 @@ async function loadData(){
         const homeScore=parseInt(r['HomeScore']||0);
         const awayScore=parseInt(r['AwayScore']||0);
         // Store by both orientations
-        const key1=home+'_'+away+'_'+round+'_'+gnum;
-        const key2=away+'_'+home+'_'+round+'_'+gnum;
+        const key1=home+'_'+away+'_'+gnum;
+        const key2=away+'_'+home+'_'+gnum;
         gameScores[key1]={homeTeam:home,awayTeam:away,homeScore,awayScore};
         gameScores[key2]={homeTeam:home,awayTeam:away,homeScore,awayScore};
       });
@@ -1462,9 +1462,8 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
     }
   } else if(!liveGame&&gameNum){
     // Try gameScores sheet lookup
-    const round=(document.getElementById('round-pill').textContent||'').trim().toUpperCase();
-    const key1=team1+'_'+team2+'_'+round+'_'+gameNum;
-    const key2=team2+'_'+team1+'_'+round+'_'+gameNum;
+    const key1=team1+'_'+team2+'_'+gameNum;
+    const key2=team2+'_'+team1+'_'+gameNum;
     const stored=gameScores[key1]||gameScores[key2]||null;
     if(stored){
       const t1Score=stored.homeTeam===team1?stored.homeScore:stored.awayScore;
