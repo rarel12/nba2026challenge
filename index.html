@@ -1464,17 +1464,13 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
     else if(liveGame.statusState==='pre'){displayStatusClass='upcoming';displayStatusText='UPCOMING';}
   }
 
-  // Live score block — ESPN cache first, gameScores sheet fallback
+  // Score block: gameScores sheet is authoritative for historical tabs
+  // ESPN live cache used only for in-progress games
   let scoreCenterHTML=`<div class="battle-vs-text">VS</div>`;
   let displayStatusOverride=null;
-  if(liveGame&&liveGame.statusState!=='pre'){
-    const t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
-    const t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
-    scoreCenterHTML=`<div style="font-size:22px;font-weight:900;font-family:'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">${t1Score} — ${t2Score}</div>`;
-    if(liveGame.statusState==='in'){
-      scoreCenterHTML+=`<div style="font-size:8px;color:#22c55e;letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px">${periodDisplay(liveGame.period,liveGame.clock)}</div>`;
-    }
-  } else if(!liveGame&&gameNum){
+
+  // Always check gameScores sheet first for this specific game number
+  if(gameNum){
     const key1=team1+'_'+team2+'_'+gameNum;
     const key2=team2+'_'+team1+'_'+gameNum;
     const stored=gameScores[key1]||gameScores[key2]||null;
@@ -1485,8 +1481,16 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
       displayStatusOverride='final';
     }
   }
-  // Apply status override from stored scores
+  // Override with live ESPN data if game is currently in progress
+  if(liveGame&&liveGame.statusState==='in'){
+    const t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
+    const t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
+    scoreCenterHTML=`<div style="font-size:22px;font-weight:900;font-family:'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">${t1Score} — ${t2Score}</div>`;
+    scoreCenterHTML+=`<div style="font-size:8px;color:#22c55e;letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px">${periodDisplay(liveGame.period,liveGame.clock)}</div>`;
+    displayStatusOverride='live';
+  }
   if(displayStatusOverride==='final'){displayStatusClass='final';displayStatusText='FINAL';}
+  if(displayStatusOverride==='live'){displayStatusClass='live';displayStatusText='● LIVE';}
 
   const arenaHTML=`<div class="battle-arena">
     <div class="battle-team-block">
