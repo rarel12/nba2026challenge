@@ -1409,10 +1409,27 @@ function refreshCurrentBattleTab(){
 // Render the current (live/upcoming) game tab
 function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
   var liveGame=null;
+  // 1. Try in-memory cache first
   if(lastGoodGames&&lastGoodGames.games){
     liveGame=lastGoodGames.games.find(function(g){
       return (g.homeTeam===team1&&g.awayTeam===team2)||(g.homeTeam===team2&&g.awayTeam===team1);
     });
+  }
+  // 2. Fall back to localStorage if in-memory is gone (page reloaded after game ended)
+  if(!liveGame){
+    try{
+      var nowCT=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'}));
+      var todayKey='cachedGames_'+nowCT.toLocaleDateString('en-CA');
+      var yesterday=new Date(nowCT);yesterday.setDate(yesterday.getDate()-1);
+      var yesterdayKey='cachedGames_'+yesterday.toLocaleDateString('en-CA');
+      var raw=localStorage.getItem(todayKey)||localStorage.getItem(yesterdayKey);
+      if(raw){
+        var cached=JSON.parse(raw);
+        liveGame=cached.find(function(g){
+          return (g.homeTeam===team1&&g.awayTeam===team2)||(g.homeTeam===team2&&g.awayTeam===team1);
+        });
+      }
+    }catch(e){}
   }
   var statusEl=document.getElementById('battle-status');
   var scoreCenterHTML='<div class="battle-vs-text">VS</div>';
