@@ -1217,6 +1217,8 @@ function openBattle(team1,team2,seed1,seed2,w1,w2){
   document.getElementById('battle-record').textContent=record;
   document.getElementById('app-chrome').style.display='none';
   document.getElementById('battle-chrome').style.display='block';
+  const bStatusBar=document.querySelector('#battle .status-bar');
+  if(bStatusBar) bStatusBar.style.display='';
   const seriesGames=getBattleGames(team1,team2);
   renderBattleTabs(seriesGames,Math.max(w1n+w2n,1),team1,team2,seed1,seed2);
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1409,27 +1411,10 @@ function refreshCurrentBattleTab(){
 // Render the current (live/upcoming) game tab
 function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
   var liveGame=null;
-  // 1. Try in-memory cache first
   if(lastGoodGames&&lastGoodGames.games){
     liveGame=lastGoodGames.games.find(function(g){
       return (g.homeTeam===team1&&g.awayTeam===team2)||(g.homeTeam===team2&&g.awayTeam===team1);
     });
-  }
-  // 2. Fall back to localStorage if in-memory is gone (page reloaded after game ended)
-  if(!liveGame){
-    try{
-      var nowCT=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'}));
-      var todayKey='cachedGames_'+nowCT.toLocaleDateString('en-CA');
-      var yesterday=new Date(nowCT);yesterday.setDate(yesterday.getDate()-1);
-      var yesterdayKey='cachedGames_'+yesterday.toLocaleDateString('en-CA');
-      var raw=localStorage.getItem(todayKey)||localStorage.getItem(yesterdayKey);
-      if(raw){
-        var cached=JSON.parse(raw);
-        liveGame=cached.find(function(g){
-          return (g.homeTeam===team1&&g.awayTeam===team2)||(g.homeTeam===team2&&g.awayTeam===team1);
-        });
-      }
-    }catch(e){}
   }
   var statusEl=document.getElementById('battle-status');
   var scoreCenterHTML='<div class="battle-vs-text">VS</div>';
@@ -1442,11 +1427,11 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       displayStatusClass='live';displayStatusText='● LIVE';
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+t1Score+' — '+t2Score+'</div>'
         +'<div style="font-size:8px;color:#22c55e;letter-spacing:1px;margin-top:2px">'+periodDisplay(liveGame.period,liveGame.clock)+'</div>';
-      if(statusEl)statusEl.textContent='Updated: '+new Date().toLocaleTimeString();
+      if(statusEl){statusEl.textContent='Updated: '+new Date().toLocaleTimeString();statusEl.parentElement.style.display='';}
     } else if(liveGame.statusState==='post'){
       displayStatusClass='final';displayStatusText='FINAL';
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+t1Score+' — '+t2Score+'</div>';
-      if(statusEl)statusEl.textContent='Final score — cached until 5am';
+      if(statusEl){statusEl.textContent='';statusEl.parentElement.style.display='none';}
     } else if(liveGame.statusState==='pre'){
       displayStatusClass='upcoming';displayStatusText='UPCOMING';
       var tipDisplay='';
@@ -1464,7 +1449,7 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       var ts2=stored.homeTeam===team2?stored.homeScore:stored.awayScore;
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+ts1+' — '+ts2+'</div>';
       displayStatusClass='final';displayStatusText='FINAL';
-      if(statusEl)statusEl.textContent='Final score';
+      if(statusEl){statusEl.textContent='';statusEl.parentElement.style.display='none';}
     } else {
       scoreCenterHTML='<div style="font-size:9px;color:#444;letter-spacing:1px">NO GAME TODAY</div>';
       if(statusEl)statusEl.textContent='No game scheduled today';
@@ -1518,11 +1503,13 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
         +'</div>';
     }).join('');
   };
+  var cacheNote=(liveGame&&liveGame.statusState==='post'&&!gameScores[team1+'_'+team2+'_'+gameNum]&&!gameScores[team2+'_'+team1+'_'+gameNum])
+    ?'<div style="text-align:center;padding:8px;font-size:8px;color:#333;letter-spacing:1px;font-family:\'Courier New\',monospace">stats cached until 5am</div>':'';
   document.getElementById('battle-content').innerHTML=arenaHTML
     +'<div class="battle-split-stats">'
     +'<div class="battle-stat-panel"><div class="battle-stat-panel-title">'+team1+'</div>'+buildPanel(team1)+'</div>'
     +'<div class="battle-stat-panel"><div class="battle-stat-panel-title">'+team2+'</div>'+buildPanel(team2)+'</div>'
-    +'</div>';
+    +'</div>'+cacheNote;
 }
 
 function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
