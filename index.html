@@ -1350,8 +1350,13 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
     btn.onclick=()=>{
       document.querySelectorAll('.battle-game-tab').forEach(b=>{b.classList.remove('active');b.classList.remove('current');});
       btn.classList.add('active');
+      if(isCurrent) btn.classList.add('current');
       if(!isCurrent&&battleRefreshInterval){clearInterval(battleRefreshInterval);battleRefreshInterval=null;}
-      renderBattleGame(seriesGames[gNum]||null,team1,team2,seed1,seed2,'final',gNum);
+      if(isCurrent){
+        renderBattleCurrent(team1,team2,seed1,seed2,gNum);
+      } else {
+        renderBattleGame(seriesGames[gNum]||null,team1,team2,seed1,seed2,'final',gNum);
+      }
     };
     tabs.appendChild(btn);
   });
@@ -1370,16 +1375,22 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
     tabs.appendChild(btn);
   }
 
-  // Default: show current game tab content
-  if(!seriesClinched&&(isLiveOrPre||completedArr.length===0)){
+  // Default: show the right content based on game state
+  if(isPost){
+    // Game just ended — ESPN cache still has live stats, show them on the current gold tab
+    const postGNum=lastCompleted;
+    tabs.querySelectorAll('.battle-game-tab').forEach(b=>{b.classList.remove('active');b.classList.remove('current');});
+    const allBtns=tabs.querySelectorAll('.battle-game-tab');
+    if(allBtns.length>0) allBtns[allBtns.length-1].classList.add('active');
+    renderBattleCurrent(team1,team2,seed1,seed2,postGNum);
+  } else if(!seriesClinched&&(isLiveOrPre||completedArr.length===0)){
     renderBattleCurrent(team1,team2,seed1,seed2,lastCompleted+1);
   } else if(completedArr.length>0){
-    // Show most recent completed game
-    const lastTab=tabs.querySelectorAll('.battle-game-tab');
-    // Find the last completed tab and make it active
+    // No live game, show most recent completed game from sheet/log
     const lastGNum=completedArr[completedArr.length-1];
     tabs.querySelectorAll('.battle-game-tab').forEach(b=>{b.classList.remove('active');b.classList.remove('current');});
-    if(lastTab.length>0) lastTab[lastTab.length-((!seriesClinched&&isLiveOrPre)?2:1)].classList.add('active');
+    const allBtns=tabs.querySelectorAll('.battle-game-tab');
+    if(allBtns.length>0) allBtns[allBtns.length-1].classList.add('active');
     renderBattleGame(seriesGames[lastGNum]||null,team1,team2,seed1,seed2,'final',lastGNum);
   } else {
     renderBattleCurrent(team1,team2,seed1,seed2,1);
