@@ -704,16 +704,15 @@ function renderBracket(games,ssRows){
     const t2Shadow=t2Leads||clinched2?'1px 1px 0 #8A6200':'none';
     const t1Opacity=clinched2?0.3:t2Leads?0.3:1;
     const t2Opacity=clinched1?0.3:t1Leads?0.3:1;
-    const cardBg='#000';
+    const cardBg=clinched?'#0d1a2e':'#000';
     const cardBorder=clinched?'#b8860b':'#1a1a1a';
-    const cardShadow=clinched?'inset 0 0 0 1000px rgba(13,26,46,0.55)':'';
     const BASE=`https://rarel12.github.io/nba2026challenge/logos/`;
     const statusText=clinched?'● SERIES CLINCHED':document.getElementById('round-pill').textContent||'';
     const statusColor=clinched?'#FFD700':'#555';
 
-    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder};box-shadow:${cardShadow}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
+    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
       <div class="b-team-block" style="opacity:${t1Opacity}">
-        <img class="b-logo" src="${BASE}${team1.toLowerCase()}.png" alt="${team1}" onerror="this.style.display='none'"/>
+        <img class="b-logo" src="${BASE}${team1.toLowerCase()}.png" alt="${team1}" onerror="this.style.display='none'" style="${clinched1?'border-radius:50%;box-shadow:0 0 0 2px #FFD700':''}"/>
         <div class="b-name-row">
           <span class="b-seed">${seed1}</span>
           <span class="b-abbr" style="color:${t1Color};text-shadow:${t1Shadow}">${team1}</span>
@@ -728,7 +727,7 @@ function renderBracket(games,ssRows){
         <div class="b-status" style="color:${statusColor}">${statusText}</div>
       </div>
       <div class="b-team-block" style="opacity:${t2Opacity}">
-        <img class="b-logo" src="${BASE}${team2.toLowerCase()}.png" alt="${team2}" onerror="this.style.display='none'"/>
+        <img class="b-logo" src="${BASE}${team2.toLowerCase()}.png" alt="${team2}" onerror="this.style.display='none'" style="${clinched2?'border-radius:50%;box-shadow:0 0 0 2px #FFD700':''}"/>
         <div class="b-name-row">
           <span class="b-seed">${seed2}</span>
           <span class="b-abbr" style="color:${t2Color};text-shadow:${t2Shadow}">${team2}</span>
