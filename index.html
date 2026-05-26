@@ -704,13 +704,14 @@ function renderBracket(games,ssRows){
     const t2Shadow=t2Leads||clinched2?'1px 1px 0 #8A6200':'none';
     const t1Opacity=clinched2?0.3:t2Leads?0.3:1;
     const t2Opacity=clinched1?0.3:t1Leads?0.3:1;
-    const cardBg=clinched?'#0d1a2e':'#000';
+    const cardBg='#000';
     const cardBorder=clinched?'#b8860b':'#1a1a1a';
+    const cardShadow=clinched?'inset 0 0 0 1000px rgba(13,26,46,0.55)':'';
     const BASE=`https://rarel12.github.io/nba2026challenge/logos/`;
     const statusText=clinched?'● SERIES CLINCHED':document.getElementById('round-pill').textContent||'';
     const statusColor=clinched?'#FFD700':'#555';
 
-    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
+    const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder};box-shadow:${cardShadow}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
       <div class="b-team-block" style="opacity:${t1Opacity}">
         <img class="b-logo" src="${BASE}${team1.toLowerCase()}.png" alt="${team1}" onerror="this.style.display='none'"/>
         <div class="b-name-row">
@@ -1217,8 +1218,6 @@ function openBattle(team1,team2,seed1,seed2,w1,w2){
   document.getElementById('battle-record').textContent=record;
   document.getElementById('app-chrome').style.display='none';
   document.getElementById('battle-chrome').style.display='block';
-  const bStatusBar=document.querySelector('#battle .status-bar');
-  if(bStatusBar) bStatusBar.style.display='';
   const seriesGames=getBattleGames(team1,team2);
   renderBattleTabs(seriesGames,Math.max(w1n+w2n,1),team1,team2,seed1,seed2);
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1427,11 +1426,11 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       displayStatusClass='live';displayStatusText='● LIVE';
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+t1Score+' — '+t2Score+'</div>'
         +'<div style="font-size:8px;color:#22c55e;letter-spacing:1px;margin-top:2px">'+periodDisplay(liveGame.period,liveGame.clock)+'</div>';
-      if(statusEl){statusEl.textContent='Updated: '+new Date().toLocaleTimeString();statusEl.parentElement.style.display='';}
+      if(statusEl)statusEl.textContent='Updated: '+new Date().toLocaleTimeString();
     } else if(liveGame.statusState==='post'){
       displayStatusClass='final';displayStatusText='FINAL';
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+t1Score+' — '+t2Score+'</div>';
-      if(statusEl){statusEl.textContent='';statusEl.parentElement.style.display='none';}
+      if(statusEl)statusEl.textContent='Final score — cached until 5am';
     } else if(liveGame.statusState==='pre'){
       displayStatusClass='upcoming';displayStatusText='UPCOMING';
       var tipDisplay='';
@@ -1449,7 +1448,7 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       var ts2=stored.homeTeam===team2?stored.homeScore:stored.awayScore;
       scoreCenterHTML='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">'+ts1+' — '+ts2+'</div>';
       displayStatusClass='final';displayStatusText='FINAL';
-      if(statusEl){statusEl.textContent='';statusEl.parentElement.style.display='none';}
+      if(statusEl)statusEl.textContent='Final score';
     } else {
       scoreCenterHTML='<div style="font-size:9px;color:#444;letter-spacing:1px">NO GAME TODAY</div>';
       if(statusEl)statusEl.textContent='No game scheduled today';
@@ -1503,13 +1502,11 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
         +'</div>';
     }).join('');
   };
-  var cacheNote=(liveGame&&liveGame.statusState==='post'&&!gameScores[team1+'_'+team2+'_'+gameNum]&&!gameScores[team2+'_'+team1+'_'+gameNum])
-    ?'<div style="text-align:center;padding:8px;font-size:8px;color:#333;letter-spacing:1px;font-family:\'Courier New\',monospace">stats cached until 5am</div>':'';
   document.getElementById('battle-content').innerHTML=arenaHTML
     +'<div class="battle-split-stats">'
     +'<div class="battle-stat-panel"><div class="battle-stat-panel-title">'+team1+'</div>'+buildPanel(team1)+'</div>'
     +'<div class="battle-stat-panel"><div class="battle-stat-panel-title">'+team2+'</div>'+buildPanel(team2)+'</div>'
-    +'</div>'+cacheNote;
+    +'</div>';
 }
 
 function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
