@@ -1513,25 +1513,9 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
   const t1PlayersGL=gameData?gameData.t1:[];
   const t2PlayersGL=gameData?gameData.t2:[];
 
-  // Check lastGoodGames for a live/recent game matching this series
-  let liveGame=null;
-  if(lastGoodGames&&lastGoodGames.games){
-    liveGame=lastGoodGames.games.find(g=>
-      (g.homeTeam===team1&&g.awayTeam===team2)||
-      (g.homeTeam===team2&&g.awayTeam===team1)
-    );
-  }
-  const hasLive=liveGame&&liveGame.players&&liveGame.players.length>0&&
-    (liveGame.statusState==='in'||liveGame.statusState==='post');
-
-  // Status display
+  // Historical tabs: never use live ESPN data — game log + gameScores sheet only
   let displayStatusClass=isUpcoming?'upcoming':'final';
   let displayStatusText=isUpcoming?'UPCOMING':'FINAL';
-  if(liveGame){
-    if(liveGame.statusState==='in'){displayStatusClass='live';displayStatusText='● LIVE';}
-    else if(liveGame.statusState==='post'){displayStatusClass='final';displayStatusText='FINAL';}
-    else if(liveGame.statusState==='pre'){displayStatusClass='upcoming';displayStatusText='UPCOMING';}
-  }
 
   // Score block: gameScores sheet is authoritative for historical tabs
   // ESPN live cache used only for in-progress games
@@ -1550,14 +1534,7 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
       displayStatusOverride='final';
     }
   }
-  // Override with live ESPN data if game is currently in progress
-  if(liveGame&&liveGame.statusState==='in'){
-    const t1Score=liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore;
-    const t2Score=liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore;
-    scoreCenterHTML=`<div style="font-size:22px;font-weight:900;font-family:'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:2px 2px 0 #000">${t1Score} — ${t2Score}</div>`;
-    scoreCenterHTML+=`<div style="font-size:8px;color:#22c55e;letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px">${periodDisplay(liveGame.period,liveGame.clock)}</div>`;
-    displayStatusOverride='live';
-  }
+  // Historical tabs never show live score — gameScores sheet is authoritative
   if(displayStatusOverride==='final'){displayStatusClass='final';displayStatusText='FINAL';}
   if(displayStatusOverride==='live'){displayStatusClass='live';displayStatusText='● LIVE';}
 
@@ -1583,32 +1560,17 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
   </div>`;
 
   const buildPanel=(glPlayers,teamAbbr)=>{
-    // Use live ESPN data if available, otherwise fall back to game log data
-    let players=glPlayers;
-    if(hasLive){
-      players=liveGame.players.filter(p=>p.team===teamAbbr);
-    }
-    if(!players.length) return `<div class="battle-no-players">NO TRACKED<br>PLAYERS</div>`;
-
-    return players.map(p=>{
+    // Historical tabs: game log data only, no live ESPN data
+    if(!glPlayers.length) return `<div class="battle-no-players">NO TRACKED<br>PLAYERS</div>`;
+    return glPlayers.map(p=>{
       const color=OWNER_COLORS[p.owner]||'#888';
-      const isStar=hasLive?(p.star||false):(playerStar[p.name]==='Yes');
+      const isStar=(playerStar[p.name]==='Yes')||(p.star||false);
       const isInjured=(playerStatus[p.name]||'').trim()==='Injured';
       const starHTML=isStar?`<span style="color:#FFC72C;font-size:11px;margin-left:3px">★</span>`:'';
       const injuryHTML=isInjured?`<span style="margin-left:3px">🩹</span>`:'';
-
       let statsHTML='';
       let totalVal=0;
-      if(hasLive){
-        totalVal=p.total||0;
-        if(isStar){
-          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS </span>`+
-            `<span class="tm-stat-val">${p.reb}</span><span class="tm-stat"> REB </span>`+
-            `<span class="tm-stat-val">${p.ast}</span><span class="tm-stat"> AST</span>`;
-        } else {
-          statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS</span>`;
-        }
-      } else if(!isUpcoming){
+      if(!isUpcoming){
         totalVal=p.total||p.pts||0;
         if(isStar){
           statsHTML=`<span class="tm-stat-val">${p.pts}</span><span class="tm-stat"> PTS </span>`+
@@ -1620,17 +1582,14 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
       } else {
         statsHTML=`<span class="tm-stat" style="color:#333">—</span>`;
       }
-
       return `<div class="tm-player-row">
-        <div class="tm-player-left">
-          <div>
-            <div class="tm-owner-label" style="color:${color}">${p.owner}</div>
-            <div class="tm-player-name">${p.name}${starHTML}${injuryHTML}</div>
-          </div>
-        </div>
+        <div class="tm-player-left"><div>
+          <div class="tm-owner-label" style="color:${color}">${p.owner}</div>
+          <div class="tm-player-name">${p.name}${starHTML}${injuryHTML}</div>
+        </div></div>
         <div class="tm-player-stats">
           ${statsHTML}
-          ${(hasLive||!isUpcoming)?`<span class="tm-total" style="color:${color}">${Math.round(totalVal)||0}</span>`:''}
+          ${!isUpcoming?`<span class="tm-total" style="color:${color}">${Math.round(totalVal)||0}</span>`:''}
         </div>
       </div>`;
     }).join('');
