@@ -24,8 +24,9 @@ body{background:#000;min-height:100vh}
 .bottom-strip{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:20px}
 .coin-text{font-size:11px;color:#E63A1E;font-family:'Courier New',monospace;letter-spacing:3px;text-transform:uppercase}
 .mode-text{font-size:9px;color:#555;font-family:'Courier New',monospace;letter-spacing:2px;text-transform:uppercase}
-#wipe{position:fixed;inset:0;background:#E63A1E;z-index:999;display:none;transform:translateX(-100%)}
+#wipe{position:fixed;inset:0;background:#000;z-index:999;display:none;transform:translateX(-100%)}
 #transition{display:none;position:fixed;inset:0;background:#000;z-index:50;overflow:hidden}
+#transition2{display:none;position:fixed;inset:0;background:#000;z-index:50;overflow:hidden}
 .trans-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;opacity:0;transition:opacity 0.6s ease}
 .trans-img.in{opacity:1}
 .trans-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#FFC72C,#E63A1E);width:0;transition:width 3s linear;z-index:10}
@@ -191,7 +192,7 @@ body{background:#000;min-height:100vh}
 .b-score-row{display:flex;align-items:center;gap:8px}
 .b-win{font-size:28px;font-weight:900;font-family:'Courier New',monospace}
 .b-dash{font-size:16px;color:#333}
-.b-status{font-size:6px;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
+.b-status{font-size:8px;letter-spacing:2px;text-transform:uppercase;font-family:'Courier New',monospace;text-align:center}
 .bracket-seed{font-size:9px;color:#888;font-family:'Courier New',monospace}
 .bracket-team{font-size:13px;font-weight:700}
 .bracket-wins{font-size:14px;font-weight:900;font-family:'Courier New',monospace}
@@ -236,6 +237,10 @@ body{background:#000;min-height:100vh}
 <div id="transition">
   <img class="trans-img" id="trans-img" src="https://rarel12.github.io/nba2026challenge/transition.png" alt=""/>
   <div class="trans-bar" id="trans-bar"></div>
+</div>
+<div id="transition2">
+  <img class="trans-img" id="trans-img2" src="https://rarel12.github.io/nba2026challenge/finalscourt.png" alt="" style="object-fit:contain;object-position:center"/>
+  <div class="trans-bar" id="trans-bar2"></div>
 </div>
 <div id="intro">
   <div class="scanline"></div>
@@ -489,6 +494,7 @@ function parseRunningTotals(text){
 
 function startApp(){
   const w=document.getElementById('wipe');
+  // Stage 1: wipe in → show legends screen
   w.style.display='block';w.style.transform='translateX(-100%)';w.style.transition='transform 0.25s ease-in';
   requestAnimationFrame(()=>{
     w.style.transform='translateX(0)';
@@ -499,17 +505,32 @@ function startApp(){
       setTimeout(()=>{w.style.display='none';},260);
       setTimeout(()=>{document.getElementById('trans-img').classList.add('in');},100);
       setTimeout(()=>{document.getElementById('trans-bar').classList.add('go');},100);
+      // Stage 2: wipe in → show finals court screen
       setTimeout(()=>{
-        const w2=document.getElementById('wipe');
-        w2.style.display='block';w2.style.transform='translateX(-100%)';w2.style.transition='transform 0.25s ease-in';
+        w.style.display='block';w.style.transform='translateX(-100%)';w.style.transition='transform 0.25s ease-in';
         requestAnimationFrame(()=>{
-          w2.style.transform='translateX(0)';
+          w.style.transform='translateX(0)';
           setTimeout(()=>{
             document.getElementById('transition').style.display='none';
-            document.getElementById('app').style.display='block';
-            w2.style.transition='transform 0.25s ease-out';w2.style.transform='translateX(100%)';
-            setTimeout(()=>{w2.style.display='none';},260);
-            loadData();
+            document.getElementById('transition2').style.display='block';
+            w.style.transition='transform 0.25s ease-out';w.style.transform='translateX(100%)';
+            setTimeout(()=>{w.style.display='none';},260);
+            setTimeout(()=>{document.getElementById('trans-img2').classList.add('in');},100);
+            setTimeout(()=>{document.getElementById('trans-bar2').classList.add('go');},100);
+            // Stage 3: wipe in → show app
+            setTimeout(()=>{
+              w.style.display='block';w.style.transform='translateX(-100%)';w.style.transition='transform 0.25s ease-in';
+              requestAnimationFrame(()=>{
+                w.style.transform='translateX(0)';
+                setTimeout(()=>{
+                  document.getElementById('transition2').style.display='none';
+                  document.getElementById('app').style.display='block';
+                  w.style.transition='transform 0.25s ease-out';w.style.transform='translateX(100%)';
+                  setTimeout(()=>{w.style.display='none';},260);
+                  loadData();
+                },260);
+              });
+            },3600);
           },260);
         });
       },3600);
@@ -551,6 +572,7 @@ async function loadData(){
         if(parts[1])currentRound=(parts[1]||'').replace(/"/g,'').trim().toUpperCase();
       }
     });
+    if(currentRound==='NBA FINALS')currentRound='FINALS';
     const pillEl=document.getElementById('round-pill');pillEl.textContent=currentRound;pillEl.style.display='';
     const lbRows=parseLeaderboardCSV(lbT);
     glData=parseCSV(glT).filter(r=>r['Player']&&r['Player']!=='Waiting for first game data...'&&r['Player']!=='Player');
@@ -681,6 +703,73 @@ function renderBracket(games,ssRows){
     return;
   }
 
+  const el=document.getElementById('bracket-section');
+  const BASE='https://rarel12.github.io/nba2026challenge/logos/';
+
+  // Check if this is the Finals round (single FINALS row)
+  const isFinals=ssRows.length===1&&(ssRows[0]['Conf']||'').toUpperCase()==='FINALS';
+
+  if(isFinals){
+    const s=ssRows[0];
+    // Sheet has SAS as Team1 (seed2=2, left/West) and NYK as Team2 (seed2=3, right/East)
+    // We always render: SAS left (West/red), NYK right (East/blue)
+    const sasTeam=(s['Team1']||'').toUpperCase();
+    const sasSeed=s['Seed1']||'2';
+    const nykTeam=(s['Team2']||'').toUpperCase();
+    const nykSeed=s['Seed2']||'3';
+    const sasW=parseInt(s['W1'])||0;
+    const nykW=parseInt(s['W2'])||0;
+
+    const clinched=sasW>=4||nykW>=4;
+    const sasLeads=sasW>nykW;
+    const nykLeads=nykW>sasW;
+    const tied=sasW===nykW;
+
+    const sasColor=sasW>=4?'#FFC72C':nykW>=4?'#555':sasLeads?'#FFC72C':tied?'#fff':'#555';
+    const nykColor=nykW>=4?'#FFC72C':sasW>=4?'#555':nykLeads?'#FFC72C':tied?'#fff':'#555';
+    const sasShadow=sasLeads||sasW>=4?'1px 1px 0 #8A6200':'none';
+    const nykShadow=nykLeads||nykW>=4?'1px 1px 0 #8A6200':'none';
+    const sasOpacity=nykW>=4?0.3:1;
+    const nykOpacity=sasW>=4?0.3:1;
+    const cardBorder=clinched?'#b8860b':'#1a1a1a';
+    const statusText=clinched?'● SERIES CLINCHED':'● UPCOMING';
+    const statusColor=clinched?'#FFD700':'#1E90FF';
+
+    el.innerHTML=`
+      <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — FINALS</div>
+      <div style="display:flex;flex-direction:row;justify-content:space-between;align-items:flex-end;margin-bottom:4px;gap:8px">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#E63A1E;padding-bottom:3px;border-bottom:1px solid #E63A1E;flex:1;font-family:'Courier New',monospace">WESTERN CONFERENCE</div>
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#4ab3f4;padding-bottom:3px;border-bottom:1px solid #4ab3f4;flex:1;text-align:right;font-family:'Courier New',monospace">EASTERN CONFERENCE</div>
+      </div>
+      <div class="bracket-card" style="background:#000;border:1px solid ${cardBorder}" onclick="openBattle('${sasTeam}','${nykTeam}','${sasSeed}','${nykSeed}','${sasW}','${nykW}')">
+        <div class="b-team-block" style="opacity:${sasOpacity}">
+          <img class="b-logo" src="${BASE}${sasTeam.toLowerCase()}.png" alt="${sasTeam}" onerror="this.style.display='none'" style="${sasW>=4?'border-radius:50%;box-shadow:0 0 0 2px #FFD700':''}"/>
+          <div class="b-name-row">
+            <span class="b-seed">${sasSeed}</span>
+            <span class="b-abbr" style="color:${sasColor};text-shadow:${sasShadow}">${sasTeam}</span>
+          </div>
+        </div>
+        <div class="b-middle">
+          <div class="b-score-row">
+            <span class="b-win" style="color:${sasColor};text-shadow:${sasShadow}">${sasW}</span>
+            <span class="b-dash">—</span>
+            <span class="b-win" style="color:${nykColor};text-shadow:${nykShadow}">${nykW}</span>
+          </div>
+          <div class="b-status" style="color:${statusColor}">${statusText}</div>
+        </div>
+        <div class="b-team-block" style="opacity:${nykOpacity}">
+          <img class="b-logo" src="${BASE}${nykTeam.toLowerCase()}.png" alt="${nykTeam}" onerror="this.style.display='none'" style="${nykW>=4?'border-radius:50%;box-shadow:0 0 0 2px #FFD700':''}"/>
+          <div class="b-name-row">
+            <span class="b-seed">${nykSeed}</span>
+            <span class="b-abbr" style="color:${nykColor};text-shadow:${nykShadow}">${nykTeam}</span>
+          </div>
+        </div>
+      </div>`;
+    setTimeout(()=>el.classList.add('visible'),600);
+    return;
+  }
+
+  // Non-finals rounds — original East/West layout
   let eastHTML='';let westHTML='';
   ssRows.forEach(s=>{
     const conf=(s['Conf']||'').toUpperCase();
@@ -694,7 +783,6 @@ function renderBracket(games,ssRows){
     const t1Leads=w1>w2;
     const t2Leads=w2>w1;
     const isEast=conf==='EAST';
-
     const tied=w1===w2;
     const clinched1=w1>=4;
     const clinched2=w2>=4;
@@ -708,17 +796,13 @@ function renderBracket(games,ssRows){
     const t2Opacity=clinched1?0.3:t1Leads?0.3:1;
     const cardBg='#000';
     const cardBorder=clinched?'#b8860b':'#1a1a1a';
-    const BASE=`https://rarel12.github.io/nba2026challenge/logos/`;
     const statusText=clinched?'● SERIES CLINCHED':document.getElementById('round-pill').textContent||'';
     const statusColor=clinched?'#FFD700':'#555';
 
     const card=`<div class="bracket-card" style="background:${cardBg};border:1px solid ${cardBorder}" onclick="openBattle('${team1}','${team2}','${seed1}','${seed2}','${w1}','${w2}')">
       <div class="b-team-block" style="opacity:${t1Opacity}">
         <img class="b-logo" src="${BASE}${team1.toLowerCase()}.png" alt="${team1}" onerror="this.style.display='none'" style="${clinched1?'border-radius:50%;box-shadow:0 0 0 2px #FFD700':''}"/>
-        <div class="b-name-row">
-          <span class="b-seed">${seed1}</span>
-          <span class="b-abbr" style="color:${t1Color};text-shadow:${t1Shadow}">${team1}</span>
-        </div>
+        <div class="b-name-row"><span class="b-seed">${seed1}</span><span class="b-abbr" style="color:${t1Color};text-shadow:${t1Shadow}">${team1}</span></div>
       </div>
       <div class="b-middle">
         <div class="b-score-row">
@@ -730,17 +814,13 @@ function renderBracket(games,ssRows){
       </div>
       <div class="b-team-block" style="opacity:${t2Opacity}">
         <img class="b-logo" src="${BASE}${team2.toLowerCase()}.png" alt="${team2}" onerror="this.style.display='none'" style="${clinched2?'border-radius:50%;box-shadow:0 0 0 2px #FFD700':''}"/>
-        <div class="b-name-row">
-          <span class="b-seed">${seed2}</span>
-          <span class="b-abbr" style="color:${t2Color};text-shadow:${t2Shadow}">${team2}</span>
-        </div>
+        <div class="b-name-row"><span class="b-seed">${seed2}</span><span class="b-abbr" style="color:${t2Color};text-shadow:${t2Shadow}">${team2}</span></div>
       </div>
     </div>`;
     if(isEast)eastHTML+=card;else westHTML+=card;
   });
 
   const roundLabel=document.getElementById('round-pill').textContent||'CONF. SEMIS';
-  const el=document.getElementById('bracket-section');
   el.innerHTML=`
     <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — ${roundLabel}</div>
     <div class="bracket-conf-label" style="color:#4ab3f4">EASTERN CONFERENCE</div>
