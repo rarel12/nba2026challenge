@@ -177,13 +177,13 @@ body{background:#000;min-height:100vh}
 .battle-stat-pts{font-size:11px;font-weight:900;font-family:'Courier New',monospace}
 .battle-stat-pts-label{font-size:6px;color:#444;letter-spacing:1px;text-align:right}
 .battle-no-players{font-size:8px;color:#333;letter-spacing:1px;padding:8px 0;text-align:center}
-.nbc-bug{width:100%;background:#0a0a14;border-bottom:3px solid #B87800;overflow:visible;margin:0;display:flex;flex-direction:column;position:relative;margin-top:20px}
+.nbc-bug{width:100%;background:#0a0a14;border-bottom:3px solid #B87800;overflow:visible;display:flex;flex-direction:column;position:relative;margin-top:20px}
 .nbc-bug-header{position:absolute;top:-20px;right:0;left:0;height:20px;display:flex;align-items:flex-end;justify-content:flex-end}
 .nbc-bug-topbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:#B87800}
 .nbc-bug-title{font-size:9px;font-style:italic;font-weight:900;color:#1a1a1a;letter-spacing:2px;font-family:'Courier New',monospace;padding:3px 14px 3px 18px;background:#B87800;clip-path:polygon(10px 0%,100% 0%,100% 100%,0% 100%);white-space:nowrap;position:relative;z-index:2}
-.nbc-bug-body{display:flex;align-items:stretch}
-.nbc-bug-logo-col{width:60px;flex-shrink:0;background:#0a0a14;display:flex;align-items:center;justify-content:center;padding:8px 6px}
-.nbc-bug-logo-col img{width:48px;height:auto;object-fit:contain}
+.nbc-bug-body{display:flex;align-items:stretch;min-height:90px}
+.nbc-bug-logo-col{width:64px;flex-shrink:0;background:#0a0a14;display:flex;align-items:center;justify-content:center;padding:6px}
+.nbc-bug-logo-col img{width:52px;height:auto;object-fit:contain;display:block}
 .nbc-bug-scores{flex:1;display:flex;flex-direction:column;border-left:2px solid #B87800}
 .nbc-bug-team{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #1a1a2e;flex:1}
 .nbc-bug-team:last-of-type{border-bottom:none}
@@ -1602,7 +1602,7 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       try{var bd=new Date(liveGame.date);bugClock=bd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});}catch(ex){}
       bugPeriod=bugClock;bugClock='';
     }
-    arenaHTML='<div style="padding:12px 12px 8px">'
+    arenaHTML='<div style="padding:28px 12px 8px">'
       +buildNBCBug(team1,team2,bugScore1,bugScore2,bugPeriod,bugClock,displayStatusClass,gameNum)
       +'</div>';
   } else {
@@ -1703,7 +1703,7 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
     }
     const bugState=isUpcoming?'upcoming':'final';
     const bugPeriod=isUpcoming?'UPCOMING':'FINAL';
-    arenaHTML='<div style="padding:12px 12px 8px">'
+    arenaHTML='<div style="padding:28px 12px 8px">'
       +buildNBCBug(team1,team2,bugScore1,bugScore2,bugPeriod,'',bugState,gameNum||1)
       +'</div>';
   } else {
