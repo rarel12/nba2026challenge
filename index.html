@@ -177,14 +177,14 @@ body{background:#000;min-height:100vh}
 .battle-stat-pts{font-size:11px;font-weight:900;font-family:'Courier New',monospace}
 .battle-stat-pts-label{font-size:6px;color:#444;letter-spacing:1px;text-align:right}
 .battle-no-players{font-size:8px;color:#333;letter-spacing:1px;padding:8px 0;text-align:center}
-.nbc-bug{width:100%;background:#0a0a14;border-top:3px solid #B87800;border-bottom:2px solid #B87800;overflow:hidden;margin:0;display:flex;flex-direction:column}
-.nbc-bug-header{display:flex;justify-content:space-between;align-items:center;padding:0;border-bottom:1px solid #B87800;background:#0a0a14;height:22px}
-.nbc-bug-header-line{flex:1;height:2px;background:#B87800;margin:0 6px}
-.nbc-bug-title{font-size:9px;font-style:italic;font-weight:900;color:#1a1a1a;letter-spacing:2px;font-family:'Courier New',monospace;padding:3px 14px 3px 18px;background:#B87800;clip-path:polygon(10px 0%,100% 0%,100% 100%,0% 100%);white-space:nowrap;margin-left:auto}
-.nbc-bug-body{display:flex;align-items:stretch;flex:1}
-.nbc-bug-logo-col{width:54px;flex-shrink:0;background:#0a0a14;border-right:2px solid #B87800;display:flex;align-items:center;justify-content:center;padding:6px 4px}
-.nbc-bug-logo-col img{width:44px;height:auto;object-fit:contain}
-.nbc-bug-scores{flex:1;display:flex;flex-direction:column}
+.nbc-bug{width:100%;background:#0a0a14;border-bottom:3px solid #B87800;overflow:visible;margin:0;display:flex;flex-direction:column;position:relative;margin-top:20px}
+.nbc-bug-header{position:absolute;top:-20px;right:0;left:0;height:20px;display:flex;align-items:flex-end;justify-content:flex-end}
+.nbc-bug-topbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:#B87800}
+.nbc-bug-title{font-size:9px;font-style:italic;font-weight:900;color:#1a1a1a;letter-spacing:2px;font-family:'Courier New',monospace;padding:3px 14px 3px 18px;background:#B87800;clip-path:polygon(10px 0%,100% 0%,100% 100%,0% 100%);white-space:nowrap;position:relative;z-index:2}
+.nbc-bug-body{display:flex;align-items:stretch}
+.nbc-bug-logo-col{width:60px;flex-shrink:0;background:#0a0a14;display:flex;align-items:center;justify-content:center;padding:8px 6px}
+.nbc-bug-logo-col img{width:48px;height:auto;object-fit:contain}
+.nbc-bug-scores{flex:1;display:flex;flex-direction:column;border-left:2px solid #B87800}
 .nbc-bug-team{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #1a1a2e;flex:1}
 .nbc-bug-team:last-of-type{border-bottom:none}
 .nbc-bug-team-name{font-size:13px;font-weight:900;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
@@ -1521,10 +1521,7 @@ function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum)
   const s1=isUpcoming?'—':score1;
   const s2=isUpcoming?'—':score2;
   return '<div class="nbc-bug">'
-    +'<div class="nbc-bug-header">'
-    +'<div class="nbc-bug-header-line"></div>'
-    +'<div class="nbc-bug-title">NBA FINALS · GAME '+gameNum+'</div>'
-    +'</div>'
+    +'<div class="nbc-bug-header"><div class="nbc-bug-topbar"></div><div class="nbc-bug-title">NBA FINALS · GAME '+gameNum+'</div></div>'
     +'<div class="nbc-bug-body">'
     +'<div class="nbc-bug-logo-col">'
     +'<img src="'+BASE+'nba-logo.png" alt="NBA" onerror="this.style.display=\'none\'"/>'
