@@ -177,15 +177,15 @@ body{background:#000;min-height:100vh}
 .battle-stat-pts{font-size:11px;font-weight:900;font-family:'Courier New',monospace}
 .battle-stat-pts-label{font-size:6px;color:#444;letter-spacing:1px;text-align:right}
 .battle-no-players{font-size:8px;color:#333;letter-spacing:1px;padding:8px 0;text-align:center}
-.nbc-bug{width:100%;background:#0a0a14;border-top:3px solid #B87800;border-bottom:2px solid #B87800;overflow:hidden;margin:0}
-.nbc-bug-header{display:flex;justify-content:space-between;align-items:center;padding:2px 10px 2px 0;border-bottom:1px solid #1a1a2e}
-.nbc-bug-logo{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:4px}
-.nbc-bug-logo img{width:40px;height:40px;object-fit:contain}
-.nbc-bug-title{font-size:9px;font-style:italic;font-weight:900;color:#FFC72C;letter-spacing:2px;font-family:'Courier New',monospace;padding:3px 8px;background:rgba(184,120,0,0.15);clip-path:polygon(8px 0%,100% 0%,100% 100%,0% 100%)}
-.nbc-bug-body{display:flex;align-items:stretch}
-.nbc-bug-logo-col{width:48px;flex-shrink:0;background:#0a0a14;border-right:1px solid #1a1a2e;display:flex;align-items:center;justify-content:center}
+.nbc-bug{width:100%;background:#0a0a14;border-top:3px solid #B87800;border-bottom:2px solid #B87800;overflow:hidden;margin:0;display:flex;flex-direction:column}
+.nbc-bug-header{display:flex;justify-content:space-between;align-items:center;padding:0;border-bottom:1px solid #B87800;background:#0a0a14;height:22px}
+.nbc-bug-header-line{flex:1;height:2px;background:#B87800;margin:0 6px}
+.nbc-bug-title{font-size:9px;font-style:italic;font-weight:900;color:#1a1a1a;letter-spacing:2px;font-family:'Courier New',monospace;padding:3px 14px 3px 18px;background:#B87800;clip-path:polygon(10px 0%,100% 0%,100% 100%,0% 100%);white-space:nowrap;margin-left:auto}
+.nbc-bug-body{display:flex;align-items:stretch;flex:1}
+.nbc-bug-logo-col{width:54px;flex-shrink:0;background:#0a0a14;border-right:2px solid #B87800;display:flex;align-items:center;justify-content:center;padding:6px 4px}
+.nbc-bug-logo-col img{width:44px;height:auto;object-fit:contain}
 .nbc-bug-scores{flex:1;display:flex;flex-direction:column}
-.nbc-bug-team{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid #1a1a2e}
+.nbc-bug-team{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #1a1a2e;flex:1}
 .nbc-bug-team:last-of-type{border-bottom:none}
 .nbc-bug-team-name{font-size:13px;font-weight:900;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
 .nbc-bug-team-score{font-size:15px;font-weight:900;color:#fff;font-family:'Courier New',monospace;letter-spacing:1px}
@@ -194,8 +194,8 @@ body{background:#000;min-height:100vh}
 .nbc-bug-clock{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;background:#1a3a6e}
 .nbc-bug-clock.final{background:#1a1a1a}
 .nbc-bug-clock.upcoming{background:#0a1a0a}
-.nbc-bug-period{font-size:10px;font-weight:900;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
-.nbc-bug-time{font-size:10px;font-weight:900;color:#fff;font-family:'Courier New',monospace}
+.nbc-bug-period{font-size:11px;font-weight:900;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
+.nbc-bug-time{font-size:11px;font-weight:900;color:#fff;font-family:'Courier New',monospace}
 .bracket-section{margin-top:20px;opacity:0}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
 .bracket-conf-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid}
@@ -1510,7 +1510,6 @@ function refreshCurrentBattleTab(){
 // NBC 1999-style scorebug — Finals only
 function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum){
   const BASE='https://rarel12.github.io/nba2026challenge/';
-  const isLive=state==='live';
   const isFinal=state==='final';
   const isUpcoming=state==='upcoming';
   const winner=isFinal?(score1>score2?1:score2>score1?2:0):0;
@@ -1523,18 +1522,21 @@ function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum)
   const s2=isUpcoming?'—':score2;
   return '<div class="nbc-bug">'
     +'<div class="nbc-bug-header">'
-    +'<img src="'+BASE+'nba-logo.png" alt="NBA" style="height:22px;object-fit:contain;padding:0 8px" onerror="this.style.display=\'none\'"/>'
+    +'<div class="nbc-bug-header-line"></div>'
     +'<div class="nbc-bug-title">NBA FINALS · GAME '+gameNum+'</div>'
     +'</div>'
     +'<div class="nbc-bug-body">'
+    +'<div class="nbc-bug-logo-col">'
+    +'<img src="'+BASE+'nba-logo.png" alt="NBA" onerror="this.style.display=\'none\'"/>'
+    +'</div>'
     +'<div class="nbc-bug-scores">'
     +'<div class="'+t1Class+'"><span class="nbc-bug-team-name">'+team1+'</span><span class="nbc-bug-team-score">'+s1+'</span></div>'
     +'<div class="'+t2Class+'"><span class="nbc-bug-team-name">'+team2+'</span><span class="nbc-bug-team-score">'+s2+'</span></div>'
-    +'</div>'
-    +'</div>'
     +'<div class="'+clockClass+'">'
     +'<span class="nbc-bug-period">'+periodLabel+'</span>'
     +'<span class="nbc-bug-time">'+timeLabel+'</span>'
+    +'</div>'
+    +'</div>'
     +'</div>'
     +'</div>';
 }
