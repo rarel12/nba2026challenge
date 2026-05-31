@@ -177,6 +177,25 @@ body{background:#000;min-height:100vh}
 .battle-stat-pts{font-size:11px;font-weight:900;font-family:'Courier New',monospace}
 .battle-stat-pts-label{font-size:6px;color:#444;letter-spacing:1px;text-align:right}
 .battle-no-players{font-size:8px;color:#333;letter-spacing:1px;padding:8px 0;text-align:center}
+.nbc-bug{width:100%;background:#0a0a14;border-top:3px solid #B87800;border-bottom:2px solid #B87800;overflow:hidden;margin:0}
+.nbc-bug-header{display:flex;justify-content:space-between;align-items:center;padding:2px 10px 2px 0;border-bottom:1px solid #1a1a2e}
+.nbc-bug-logo{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:4px}
+.nbc-bug-logo img{width:40px;height:40px;object-fit:contain}
+.nbc-bug-title{font-size:9px;font-style:italic;font-weight:900;color:#FFC72C;letter-spacing:2px;font-family:'Courier New',monospace;padding:3px 8px;background:rgba(184,120,0,0.15);clip-path:polygon(8px 0%,100% 0%,100% 100%,0% 100%)}
+.nbc-bug-body{display:flex;align-items:stretch}
+.nbc-bug-logo-col{width:48px;flex-shrink:0;background:#0a0a14;border-right:1px solid #1a1a2e;display:flex;align-items:center;justify-content:center}
+.nbc-bug-scores{flex:1;display:flex;flex-direction:column}
+.nbc-bug-team{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid #1a1a2e}
+.nbc-bug-team:last-of-type{border-bottom:none}
+.nbc-bug-team-name{font-size:13px;font-weight:900;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
+.nbc-bug-team-score{font-size:15px;font-weight:900;color:#fff;font-family:'Courier New',monospace;letter-spacing:1px}
+.nbc-bug-team.winner .nbc-bug-team-name{color:#FFC72C}
+.nbc-bug-team.winner .nbc-bug-team-score{color:#FFC72C}
+.nbc-bug-clock{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;background:#1a3a6e}
+.nbc-bug-clock.final{background:#1a1a1a}
+.nbc-bug-clock.upcoming{background:#0a1a0a}
+.nbc-bug-period{font-size:10px;font-weight:900;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
+.nbc-bug-time{font-size:10px;font-weight:900;color:#fff;font-family:'Courier New',monospace}
 .bracket-section{margin-top:20px;opacity:0}
 .bracket-section.visible{animation:bracketFadeIn 0.5s ease forwards}
 .bracket-conf-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;font-family:'Courier New',monospace;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid}
@@ -239,7 +258,7 @@ body{background:#000;min-height:100vh}
   <div class="trans-bar" id="trans-bar"></div>
 </div>
 <div id="transition2">
-  <img class="trans-img" id="trans-img2" src="https://rarel12.github.io/nba2026challenge/finalscourt.png" alt="" style="object-fit:contain;object-position:center;border:2px solid #FFC72C;box-shadow:0 0 18px 4px rgba(255,199,44,0.45)"/>
+  <img class="trans-img" id="trans-img2" src="https://rarel12.github.io/nba2026challenge/finalscourt.png" alt="" style="object-fit:contain;object-position:center"/>
   <div class="trans-bar" id="trans-bar2"></div>
 </div>
 <div id="intro">
@@ -1488,6 +1507,38 @@ function refreshCurrentBattleTab(){
   if(gNumMatch) renderBattleCurrent(team1,team2,seed1,seed2,parseInt(gNumMatch[0]));
 }
 
+// NBC 1999-style scorebug — Finals only
+function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum){
+  const BASE='https://rarel12.github.io/nba2026challenge/';
+  const isLive=state==='live';
+  const isFinal=state==='final';
+  const isUpcoming=state==='upcoming';
+  const winner=isFinal?(score1>score2?1:score2>score1?2:0):0;
+  const t1Class='nbc-bug-team'+(winner===1?' winner':'');
+  const t2Class='nbc-bug-team'+(winner===2?' winner':'');
+  const clockClass='nbc-bug-clock'+(isFinal?' final':isUpcoming?' upcoming':'');
+  const periodLabel=isFinal?'FINAL':isUpcoming?(clockStr||'UPCOMING'):periodStr;
+  const timeLabel=isFinal?'':(isUpcoming?'':clockStr);
+  const s1=isUpcoming?'—':score1;
+  const s2=isUpcoming?'—':score2;
+  return '<div class="nbc-bug">'
+    +'<div class="nbc-bug-header">'
+    +'<img src="'+BASE+'nba-logo.png" alt="NBA" style="height:22px;object-fit:contain;padding:0 8px" onerror="this.style.display=\'none\'"/>'
+    +'<div class="nbc-bug-title">NBA FINALS · GAME '+gameNum+'</div>'
+    +'</div>'
+    +'<div class="nbc-bug-body">'
+    +'<div class="nbc-bug-scores">'
+    +'<div class="'+t1Class+'"><span class="nbc-bug-team-name">'+team1+'</span><span class="nbc-bug-team-score">'+s1+'</span></div>'
+    +'<div class="'+t2Class+'"><span class="nbc-bug-team-name">'+team2+'</span><span class="nbc-bug-team-score">'+s2+'</span></div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="'+clockClass+'">'
+    +'<span class="nbc-bug-period">'+periodLabel+'</span>'
+    +'<span class="nbc-bug-time">'+timeLabel+'</span>'
+    +'</div>'
+    +'</div>';
+}
+
 // Render the current (live/upcoming) game tab
 function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
   var liveGame=null;
@@ -1535,17 +1586,38 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       if(statusEl)statusEl.textContent='No game scheduled today';
     }
   }
+  var isFinals=(document.getElementById('round-pill').textContent||'').trim().toUpperCase()==='FINALS';
   var BASE='https://rarel12.github.io/nba2026challenge/logos/';
-  var arenaHTML='<div class="battle-arena">'
-    +'<div class="battle-team-block">'
-    +'<div class="battle-team-logo"><img src="'+BASE+team1.toLowerCase()+'.png" alt="'+team1+'"/></div>'
-    +'<div class="battle-team-nameline"><span class="battle-team-seed-inline">'+seed1+'</span><span class="battle-team-name">'+team1+'</span></div>'
-    +'</div>'
-    +'<div class="battle-vs-block">'+scoreCenterHTML+'<div class="battle-status '+displayStatusClass+'">'+displayStatusText+'</div></div>'
-    +'<div class="battle-team-block">'
-    +'<div class="battle-team-logo"><img src="'+BASE+team2.toLowerCase()+'.png" alt="'+team2+'"/></div>'
-    +'<div class="battle-team-nameline"><span class="battle-team-seed-inline">'+seed2+'</span><span class="battle-team-name">'+team2+'</span></div>'
-    +'</div></div>';
+  var arenaHTML;
+  if(isFinals){
+    var bugScore1=isLiveOrFinal?(liveGame.homeTeam===team1?liveGame.homeScore:liveGame.awayScore):0;
+    var bugScore2=isLiveOrFinal?(liveGame.homeTeam===team2?liveGame.homeScore:liveGame.awayScore):0;
+    if(!isLiveOrFinal&&displayStatusClass==='final'){
+      var k1f=team1+'_'+team2+'_'+gameNum,k2f=team2+'_'+team1+'_'+gameNum;
+      var stf=gameScores[k1f]||gameScores[k2f]||null;
+      if(stf){bugScore1=stf.homeTeam===team1?stf.homeScore:stf.awayScore;bugScore2=stf.homeTeam===team2?stf.homeScore:stf.awayScore;}
+    }
+    var bugPeriod=liveGame?periodDisplay(liveGame.period,liveGame.clock):'';
+    var bugClock='';
+    if(displayStatusClass==='upcoming'&&liveGame&&liveGame.date){
+      try{var bd=new Date(liveGame.date);bugClock=bd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});}catch(ex){}
+      bugPeriod=bugClock;bugClock='';
+    }
+    arenaHTML='<div style="padding:12px 12px 8px">'
+      +buildNBCBug(team1,team2,bugScore1,bugScore2,bugPeriod,bugClock,displayStatusClass,gameNum)
+      +'</div>';
+  } else {
+    arenaHTML='<div class="battle-arena">'
+      +'<div class="battle-team-block">'
+      +'<div class="battle-team-logo"><img src="'+BASE+team1.toLowerCase()+'.png" alt="'+team1+'"/></div>'
+      +'<div class="battle-team-nameline"><span class="battle-team-seed-inline">'+seed1+'</span><span class="battle-team-name">'+team1+'</span></div>'
+      +'</div>'
+      +'<div class="battle-vs-block">'+scoreCenterHTML+'<div class="battle-status '+displayStatusClass+'">'+displayStatusText+'</div></div>'
+      +'<div class="battle-team-block">'
+      +'<div class="battle-team-logo"><img src="'+BASE+team2.toLowerCase()+'.png" alt="'+team2+'"/></div>'
+      +'<div class="battle-team-nameline"><span class="battle-team-seed-inline">'+seed2+'</span><span class="battle-team-name">'+team2+'</span></div>'
+      +'</div></div>';
+  }
   var isLiveOrFinal=liveGame&&(liveGame.statusState==='in'||liveGame.statusState==='post');
   var buildPanel=function(teamAbbr){
     var players=[];
@@ -1620,7 +1692,23 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
   if(displayStatusOverride==='final'){displayStatusClass='final';displayStatusText='FINAL';}
   if(displayStatusOverride==='live'){displayStatusClass='live';displayStatusText='● LIVE';}
 
-  const arenaHTML=`<div class="battle-arena">
+  const isFinals=(document.getElementById('round-pill').textContent||'').trim().toUpperCase()==='FINALS';
+  const BASE_LOGOS='https://rarel12.github.io/nba2026challenge/logos/';
+  let arenaHTML;
+  if(isFinals){
+    let bugScore1=0,bugScore2=0;
+    if(gameNum){
+      const k1=team1+'_'+team2+'_'+gameNum,k2=team2+'_'+team1+'_'+gameNum;
+      const st=gameScores[k1]||gameScores[k2]||null;
+      if(st){bugScore1=st.homeTeam===team1?st.homeScore:st.awayScore;bugScore2=st.homeTeam===team2?st.homeScore:st.awayScore;}
+    }
+    const bugState=isUpcoming?'upcoming':'final';
+    const bugPeriod=isUpcoming?'UPCOMING':'FINAL';
+    arenaHTML='<div style="padding:12px 12px 8px">'
+      +buildNBCBug(team1,team2,bugScore1,bugScore2,bugPeriod,'',bugState,gameNum||1)
+      +'</div>';
+  } else {
+    arenaHTML=`<div class="battle-arena">
     <div class="battle-team-block">
       <div class="battle-team-logo"><img src="https://rarel12.github.io/nba2026challenge/logos/${team1.toLowerCase()}.png" alt="${team1}"/></div>
       <div class="battle-team-nameline">
@@ -1640,6 +1728,7 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
       </div>
     </div>
   </div>`;
+  }
 
   const buildPanel=(glPlayers,teamAbbr)=>{
     // Historical tabs: game log data only, no live ESPN data
