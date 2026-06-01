@@ -1525,26 +1525,29 @@ function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum)
   const c1=t1Winner?'#FFC72C':'#fff';
   const c2=t2Winner?'#FFC72C':'#fff';
   const periodColor=isUpcoming?'#4ade80':'#fff';
-  const nbaLogo=`<img src="https://rarel12.github.io/nba2026challenge/nba-logo.png" alt="NBA" style="width:56px;height:auto;display:block"/>`;
-  return `<div style="width:100%;background:#000;position:relative;display:flex;flex-direction:column;border-top:3px solid #FFC72C;border-bottom:3px solid #FFC72C;font-family:'Arial Black',Arial,sans-serif;overflow:visible">
-    <div style="display:flex;align-items:flex-start;justify-content:flex-end;height:0;position:relative;z-index:5">
-      <div style="background:#FFC72C;color:#000;font-size:10px;font-weight:900;font-style:italic;letter-spacing:2px;padding:4px 14px 4px 20px;clip-path:polygon(12px 0%,100% 0%,100% 100%,0% 100%);transform:translateY(-100%);white-space:nowrap;line-height:1.4">NBA FINALS &nbsp;·&nbsp; GAME ${gameNum}</div>
+  // Outer container — no borders, no overflow hidden
+  return `<div style="width:100%;display:flex;align-items:stretch;font-family:'Arial Black',Arial,sans-serif;position:relative">
+    <!-- Logo column — stands alone, no clipping -->
+    <div style="width:68px;flex-shrink:0;background:#000;display:flex;align-items:center;justify-content:center;padding:6px 4px">
+      <img src="https://rarel12.github.io/nba2026challenge/nba-logo.png" alt="NBA" style="width:56px;height:auto;display:block"/>
     </div>
-    <div style="display:flex;align-items:stretch">
-      <div style="width:72px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:6px;background:#000">${nbaLogo}</div>
-      <div style="flex:1;display:flex;flex-direction:column;border-left:2px solid #FFC72C;min-height:100%">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex:1">
-          <span style="font-size:clamp(11px,2.2vw,17px);font-weight:900;color:${c1};letter-spacing:1.5px;text-transform:uppercase">${n1}</span>
-          <span style="font-size:clamp(13px,2.5vw,20px);font-weight:900;color:${c1};letter-spacing:1px;min-width:32px;text-align:right">${s1}</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex:1;border-top:1px solid #1a1a1a">
-          <span style="font-size:clamp(11px,2.2vw,17px);font-weight:900;color:${c2};letter-spacing:1.5px;text-transform:uppercase">${n2}</span>
-          <span style="font-size:clamp(13px,2.5vw,20px);font-weight:900;color:${c2};letter-spacing:1px;min-width:32px;text-align:right">${s2}</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:${clockBg}">
-          <span style="font-size:clamp(10px,1.8vw,14px);font-weight:900;color:${periodColor};letter-spacing:2px;text-transform:uppercase">${periodLabel}</span>
-          <span style="font-size:clamp(10px,1.8vw,14px);font-weight:900;color:#fff;letter-spacing:1px">${timeLabel}</span>
-        </div>
+    <!-- Scores column — gold borders only here -->
+    <div style="flex:1;display:flex;flex-direction:column;border-top:3px solid #FFC72C;border-bottom:3px solid #FFC72C;border-left:2px solid #FFC72C;background:#000;position:relative">
+      <!-- Title badge -->
+      <div style="position:absolute;top:-3px;right:0;transform:translateY(-100%);background:#FFC72C;color:#000;font-size:10px;font-weight:900;font-style:italic;letter-spacing:2px;padding:3px 14px 3px 20px;clip-path:polygon(12px 0%,100% 0%,100% 100%,0% 100%);white-space:nowrap;line-height:1.4">NBA FINALS &nbsp;·&nbsp; GAME ${gameNum}</div>
+      <!-- Team rows -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex:1">
+        <span style="font-size:clamp(11px,2.2vw,17px);font-weight:900;color:${c1};letter-spacing:1.5px;text-transform:uppercase">${n1}</span>
+        <span style="font-size:clamp(13px,2.5vw,20px);font-weight:900;color:${c1};min-width:32px;text-align:right">${s1}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex:1;border-top:1px solid #1a1a1a">
+        <span style="font-size:clamp(11px,2.2vw,17px);font-weight:900;color:${c2};letter-spacing:1.5px;text-transform:uppercase">${n2}</span>
+        <span style="font-size:clamp(13px,2.5vw,20px);font-weight:900;color:${c2};min-width:32px;text-align:right">${s2}</span>
+      </div>
+      <!-- Clock bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:${clockBg}">
+        <span style="font-size:clamp(10px,1.8vw,14px);font-weight:900;color:${periodColor};letter-spacing:2px;text-transform:uppercase">${periodLabel}</span>
+        <span style="font-size:clamp(10px,1.8vw,14px);font-weight:900;color:#fff;letter-spacing:1px">${timeLabel}</span>
       </div>
     </div>
   </div>`;
