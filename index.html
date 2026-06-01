@@ -1525,7 +1525,7 @@ function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum)
   const c1=t1Winner?'#FFC72C':'#fff';
   const c2=t2Winner?'#FFC72C':'#fff';
   const periodColor=isUpcoming?'#4ade80':'#fff';
-  const nbaLogo=`<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="80" rx="5" fill="#C8102E"/><ellipse cx="30" cy="40" rx="26" ry="37" fill="none" stroke="#fff" stroke-width="3"/><rect x="21" y="0" width="18" height="80" fill="#1D428A"/><text x="30" y="74" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="10" font-weight="900" fill="#fff" letter-spacing="1">NBA</text></svg>`;
+  const nbaLogo=`<img src="https://rarel12.github.io/nba2026challenge/nba-logo.png" alt="NBA" style="width:52px;height:auto;object-fit:contain;display:block"/>`;
   return `<div style="width:100%;background:#000;position:relative;display:flex;flex-direction:column;border-top:3px solid #FFC72C;border-bottom:3px solid #FFC72C;font-family:'Arial Black',Arial,sans-serif">
     <div style="display:flex;align-items:flex-start;justify-content:flex-end;height:0;position:relative;z-index:5">
       <div style="background:#FFC72C;color:#000;font-size:10px;font-weight:900;font-style:italic;letter-spacing:2px;padding:4px 14px 4px 20px;clip-path:polygon(12px 0%,100% 0%,100% 100%,0% 100%);transform:translateY(-100%);white-space:nowrap;line-height:1.4">NBA FINALS &nbsp;·&nbsp; GAME ${gameNum}</div>
