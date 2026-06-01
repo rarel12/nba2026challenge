@@ -1507,35 +1507,37 @@ function refreshCurrentBattleTab(){
   if(gNumMatch) renderBattleCurrent(team1,team2,seed1,seed2,parseInt(gNumMatch[0]));
 }
 
-// NBC 1999-style scorebug — Finals only
+// NBC scorebug — image-based overlay, Finals only
 function buildNBCBug(team1,team2,score1,score2,periodStr,clockStr,state,gameNum){
   const BASE='https://rarel12.github.io/nba2026challenge/';
   const isFinal=state==='final';
   const isUpcoming=state==='upcoming';
   const winner=isFinal?(score1>score2?1:score2>score1?2:0):0;
-  const t1Class='nbc-bug-team'+(winner===1?' winner':'');
-  const t2Class='nbc-bug-team'+(winner===2?' winner':'');
-  const clockClass='nbc-bug-clock'+(isFinal?' final':isUpcoming?' upcoming':'');
-  const periodLabel=isFinal?'FINAL':isUpcoming?(clockStr||'UPCOMING'):periodStr;
-  const timeLabel=isFinal?'':(isUpcoming?'':clockStr);
+  const t1Gold=winner===1;
+  const t2Gold=winner===2;
   const s1=isUpcoming?'—':score1;
   const s2=isUpcoming?'—':score2;
-  return '<div class="nbc-bug">'
-    +'<div class="nbc-bug-header"><div class="nbc-bug-topbar"></div><div class="nbc-bug-title">NBA FINALS · GAME '+gameNum+'</div></div>'
-    +'<div class="nbc-bug-body">'
-    +'<div class="nbc-bug-logo-col">'
-    +'<img src="'+BASE+'nba-logo.png" alt="NBA" onerror="this.style.display=\'none\'"/>'
-    +'</div>'
-    +'<div class="nbc-bug-scores">'
-    +'<div class="'+t1Class+'"><span class="nbc-bug-team-name">'+team1+'</span><span class="nbc-bug-team-score">'+s1+'</span></div>'
-    +'<div class="'+t2Class+'"><span class="nbc-bug-team-name">'+team2+'</span><span class="nbc-bug-team-score">'+s2+'</span></div>'
-    +'<div class="'+clockClass+'">'
-    +'<span class="nbc-bug-period">'+periodLabel+'</span>'
-    +'<span class="nbc-bug-time">'+timeLabel+'</span>'
-    +'</div>'
-    +'</div>'
-    +'</div>'
-    +'</div>';
+  const periodLabel=isFinal?'FINAL':isUpcoming?'UPCOMING':periodStr;
+  const timeLabel=(isFinal||isUpcoming)?'':clockStr;
+  // Positions calibrated to 2048x409 image scaled to 100% container width
+  // All % values are relative to the rendered container
+  return `<div style="position:relative;width:100%;font-family:Arial Black,sans-serif">
+    <img src="${BASE}scorebug.png" alt="" style="width:100%;display:block"/>
+    <!-- Team 1 name -->
+    <div style="position:absolute;top:20%;left:22%;font-size:clamp(10px,2.8vw,22px);font-weight:900;color:${t1Gold?'#FFC72C':'#fff'};letter-spacing:0.08em;text-transform:uppercase;line-height:1">${team1}</div>
+    <!-- Team 2 name -->
+    <div style="position:absolute;top:46%;left:22%;font-size:clamp(10px,2.8vw,22px);font-weight:900;color:${t2Gold?'#FFC72C':'#fff'};letter-spacing:0.08em;text-transform:uppercase;line-height:1">${team2}</div>
+    <!-- Score 1 -->
+    <div style="position:absolute;top:18%;right:3%;font-size:clamp(10px,3vw,24px);font-weight:900;color:${t1Gold?'#FFC72C':'#fff'};letter-spacing:0.05em;line-height:1">${s1}</div>
+    <!-- Score 2 -->
+    <div style="position:absolute;top:44%;right:3%;font-size:clamp(10px,3vw,24px);font-weight:900;color:${t2Gold?'#FFC72C':'#fff'};letter-spacing:0.05em;line-height:1">${s2}</div>
+    <!-- Period -->
+    <div style="position:absolute;top:72%;left:22%;font-size:clamp(9px,2.2vw,18px);font-weight:900;color:#fff;letter-spacing:0.08em;text-transform:uppercase;line-height:1">${periodLabel}</div>
+    <!-- Clock -->
+    <div style="position:absolute;top:72%;right:3%;font-size:clamp(9px,2.2vw,18px);font-weight:900;color:#fff;letter-spacing:0.05em;line-height:1">${timeLabel}</div>
+    <!-- Game number overlay on title badge -->
+    <div style="position:absolute;top:3%;right:3%;font-size:clamp(7px,1.4vw,12px);font-weight:900;font-style:italic;color:#1a1a1a;letter-spacing:0.1em">· GAME ${gameNum}</div>
+  </div>`;
 }
 
 // Render the current (live/upcoming) game tab
@@ -1602,7 +1604,7 @@ function renderBattleCurrent(team1,team2,seed1,seed2,gameNum){
       try{var bd=new Date(liveGame.date);bugClock=bd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'});}catch(ex){}
       bugPeriod=bugClock;bugClock='';
     }
-    arenaHTML='<div style="padding:28px 12px 8px">'
+    arenaHTML='<div style="padding:8px 12px 8px">'
       +buildNBCBug(team1,team2,bugScore1,bugScore2,bugPeriod,bugClock,displayStatusClass,gameNum)
       +'</div>';
   } else {
@@ -1703,7 +1705,7 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
     }
     const bugState=isUpcoming?'upcoming':'final';
     const bugPeriod=isUpcoming?'UPCOMING':'FINAL';
-    arenaHTML='<div style="padding:28px 12px 8px">'
+    arenaHTML='<div style="padding:8px 12px 8px">'
       +buildNBCBug(team1,team2,bugScore1,bugScore2,bugPeriod,'',bugState,gameNum||1)
       +'</div>';
   } else {
