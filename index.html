@@ -751,8 +751,8 @@ function renderBracket(games,ssRows){
     const sasOpacity=nykW>=4?0.3:1;
     const nykOpacity=sasW>=4?0.3:1;
     const cardBorder=clinched?'#b8860b':'#1a1a1a';
-    const statusText=clinched?'● SERIES CLINCHED':'● UPCOMING';
-    const statusColor=clinched?'#FFD700':'#1E90FF';
+    const statusText=clinched?'● SERIES CLINCHED':'';
+    const statusColor=clinched?'#FFD700':'transparent';
 
     el.innerHTML=`
       <div style="font-size:9px;color:#aaa;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:10px;margin-top:4px">2026 PLAYOFFS — FINALS</div>
