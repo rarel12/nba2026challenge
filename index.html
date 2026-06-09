@@ -658,8 +658,36 @@ async function loadMatchups(){
     const yesterdayKey='cachedGames_'+yesterday.toLocaleDateString('en-CA');
 
     if(hourCT>=5){
+      // Only clear date-based cache, never touch completedGame_ keys
       Object.keys(localStorage).filter(k=>k.startsWith('cachedGames_')&&k!==todayKey).forEach(k=>localStorage.removeItem(k));
       if(lastGoodGames&&lastGoodGames.date!==todayKey) lastGoodGames=null;
+      // Clear completedGame_ keys only if Game Log sheet has confirmed those stats
+      Object.keys(localStorage).filter(k=>k.startsWith('completedGame_')).forEach(k=>{
+        const parts=k.replace('completedGame_','').split('_');
+        if(parts.length>=3){
+          const gnum=parseInt(parts[parts.length-1]);
+          // Check if glData has any Finals entry for this game number
+          const confirmed=glData&&glData.some(r=>{
+            const round=(r['Round']||'').toUpperCase();
+            const rg=parseInt((r['Game #']||'').toString().replace(/[^0-9]/g,''));
+            return (round==='FINALS')&&rg===gnum;
+          });
+          if(confirmed)localStorage.removeItem(k);
+        }
+      });
+    }
+
+    // Cache any completed (post) games permanently by game number
+    if(data.games&&data.games.length>0){
+      data.games.forEach(g=>{
+        if(g.statusState==='post'&&g.seriesGame){
+          const ck='completedGame_'+g.homeTeam+'_'+g.awayTeam+'_'+g.seriesGame;
+          try{
+            const existing=localStorage.getItem(ck);
+            if(!existing)localStorage.setItem(ck,JSON.stringify(g));
+          }catch(e){}
+        }
+      });
     }
 
     if(data.games&&data.games.length>0){
@@ -1408,12 +1436,20 @@ function renderBattleTabs(seriesGames,totalGames,team1,team2,seed1,seed2){
   const t1up=team1.toUpperCase();
   const t2up=team2.toUpperCase();
 
-  // Build full set of completed game numbers from game log + gameScores sheet
+  // Build full set of completed game numbers from game log + gameScores sheet + completedGame_ cache
   const completedNums=new Set(playedGames);
   Object.keys(gameScores).forEach(k=>{
     const parts=k.split('_');
     if(parts.length===3){
       const a=parts[0],b=parts[1],gn=parseInt(parts[2]);
+      if((a===t1up&&b===t2up)||(a===t2up&&b===t1up)) completedNums.add(gn);
+    }
+  });
+  // Also check completedGame_ localStorage cache
+  Object.keys(localStorage).filter(k=>k.startsWith('completedGame_')).forEach(k=>{
+    const parts=k.replace('completedGame_','').split('_');
+    if(parts.length>=3){
+      const a=parts[0],b=parts[1],gn=parseInt(parts[parts.length-1]);
       if((a===t1up&&b===t2up)||(a===t2up&&b===t1up)) completedNums.add(gn);
     }
   });
@@ -1709,7 +1745,16 @@ function renderBattleGame(gameData,team1,team2,seed1,seed2,status,gameNum){
     if(gameNum){
       const k1=team1+'_'+team2+'_'+gameNum,k2=team2+'_'+team1+'_'+gameNum;
       const st=gameScores[k1]||gameScores[k2]||null;
-      if(st){bugScore1=st.homeTeam===team1?st.homeScore:st.awayScore;bugScore2=st.homeTeam===team2?st.homeScore:st.awayScore;}
+      if(st){
+        bugScore1=st.homeTeam===team1?st.homeScore:st.awayScore;
+        bugScore2=st.homeTeam===team2?st.homeScore:st.awayScore;
+      } else {
+        // Fall back to completedGame_ cache
+        const ck1='completedGame_'+team1+'_'+team2+'_'+gameNum;
+        const ck2='completedGame_'+team2+'_'+team1+'_'+gameNum;
+        const raw=localStorage.getItem(ck1)||localStorage.getItem(ck2);
+        if(raw){try{const g=JSON.parse(raw);bugScore1=g.homeTeam===team1?g.homeScore:g.awayScore;bugScore2=g.homeTeam===team2?g.homeScore:g.awayScore;}catch(e){}}
+      }
     }
     const bugState=isUpcoming?'upcoming':'final';
     const bugPeriod=isUpcoming?'UPCOMING':'FINAL';
