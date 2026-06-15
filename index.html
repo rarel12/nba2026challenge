@@ -345,7 +345,7 @@ body{background:#000;min-height:100vh}
   </div>
   <div id="leaderboard" class="section active">
     <div class="status-bar">
-      <div class="status-text" id="lb-status">Loading live data...</div>
+      <div class="status-text" id="lb-status">Loading...</div>
     </div>
     <div class="lb-card">
       <div class="lb-header">
@@ -465,6 +465,30 @@ const MEDALS=['#FFD700','#C0C0C0','#CD7F32','#666'];
 const MEDAL_LABELS=['1ST','2ND','3RD','4TH'];
 const MEDAL_SHADOWS=['#8A6200','#333','#5a3000','#000'];
 const OWNER_SHADOWS={'KMART':'#003366','The Fanchise':'#1a4d10','Mr. HUSTLE':'#6b1000','AIR-EL':'#3d1a6e'};
+
+// ═══════════════════════════════════════════════════════════════
+//  SEASON CONFIG — the only things you need to change each year
+// ═══════════════════════════════════════════════════════════════
+//
+//  OFF-SEASON (right now):  SEASON_OVER = true
+//  NEW SEASON (next April): SEASON_OVER = false, update year + champion
+//
+//  2027 reset checklist:
+//    1. SEASON_OVER  → false
+//    2. SEASON_YEAR  → '2027'
+//    3. CHAMPION     → ''   (clear until a winner is crowned)
+//    4. Update TRACKED[] array below with new rosters
+//    5. Update Google Sheet URLs if using a new sheet
+//    6. Run initFinalsRound() / setSeriesTriggers() in Apps Script
+//    7. Update BRACKET array in Apps Script updateSeriesScores()
+//    8. Add new logos to /logos/ and player images to /players/
+//    9. Update <title> and .app-title / .tab-footer-text (search "2026")
+// ═══════════════════════════════════════════════════════════════
+const SEASON_OVER = true;    // true = static off-season mode; false = live polling
+const SEASON_YEAR = '2026';
+const CHAMPION    = 'NYK';   // displayed in header pill via Google Sheet Settings B4
+// ═══════════════════════════════════════════════════════════════
+
 let glData=[];
 let playerStatus={};
 let playerStar={};
@@ -626,6 +650,9 @@ async function loadData(){
     });
     const ts=lastRun?'Stats as of: '+lastRun:'Stats as of: last 5am pull';
     ['lb-status','stats-status','gl-status'].forEach(id=>document.getElementById(id).textContent=ts);
+    if(SEASON_OVER){
+      document.getElementById('lb-status').textContent='2026 Season Complete · Final Standings';
+    }
     document.getElementById('tm-status').textContent='Updated: '+new Date().toLocaleTimeString();
     loadMatchups();
   }catch(e){
@@ -640,6 +667,20 @@ let lastGoodGames=null;
 let gameScores={}; // key: "HOMETEAM_AWAYTEAM_ROUND_GAMENUM" -> {homeScore, awayScore}
 
 async function loadMatchups(){
+  // ── OFF-SEASON MODE ──────────────────────────────────────────────
+  // SEASON_OVER=true: skip live ESPN/Apps Script entirely.
+  // Just pull the Series Scores sheet to keep the bracket card visible.
+  // No interval is set — the app becomes fully static after this one call.
+  if(SEASON_OVER){
+    try{
+      const ssResp=await fetch(SS_URL+'&t='+Date.now());
+      const ssText=await ssResp.text();
+      const ssRows=parseCSV(ssText).filter(r=>r['Conf']);
+      renderBracket([],ssRows);
+    }catch(e){console.error('Bracket load error:',e);}
+    return; // no interval, no ESPN call
+  }
+  // ─────────────────────────────────────────────────────────────────
   try{
     const [liveResp,ssResp]=await Promise.all([
       fetch(LIVE_URL+'?t='+Date.now()),
@@ -996,14 +1037,18 @@ function renderLeaderboard(rows){
   document.getElementById('lb-rows').innerHTML=sorted.map(([owner,score],i)=>{
     const color=OWNER_COLORS[owner]||'#888';
     const shadow=OWNER_SHADOWS[owner]||'#000';
-    const behind=i===0?'LEADER':'-'+Math.round(max-score)+' PTS';
+    const isWinner=SEASON_OVER&&i===0;
+    const behind=i===0?(isWinner?'🏆 CHAMPION':'LEADER'):'-'+Math.round(max-score)+' PTS';
     const pct=(score/max*100).toFixed(1);
-    return `<div class="lb-row">
+    const winnerStyle=isWinner
+      ?'box-shadow:inset 0 0 0 2px #FFD700;background:rgba(255,215,0,0.06);'
+      :'';
+    return `<div class="lb-row" style="${winnerStyle}">
       <div class="lb-rank" style="color:${MEDALS[i]};text-shadow:2px 2px 0 ${MEDAL_SHADOWS[i]}">${MEDAL_LABELS[i]}</div>
       <div class="lb-info">
-        <div class="lb-name" style="color:${color};text-shadow:2px 2px 0 ${shadow}">${owner}</div>
+        <div class="lb-name" style="color:${color};text-shadow:2px 2px 0 ${shadow}">${owner}${isWinner?'<span style="font-size:11px;margin-left:6px">🏆</span>':''}</div>
         <div class="lb-sub">${behind}</div>
-        <div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
+        <div class="score-bar-wrap"><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${color}${isWinner?';box-shadow:0 0 6px '+color+'88':''}"></div></div></div>
       </div>
       <div class="lb-right">
         <div class="lb-score" style="color:${color};text-shadow:2px 2px 0 ${shadow},0 0 10px ${color}88">${Math.round(score)}</div>
